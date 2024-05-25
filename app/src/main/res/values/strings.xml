@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Tap Bot</string>
+    <string name="accessibility_service_description">Enable Tap Bot to work in background</string>
+</resources>
