@@ -1,27 +1,27 @@
-package com.example.tapbot
+package com.example.tapbot.ui
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.tapbot.R
 import com.example.tapbot.domain.activityresult.OverlayPermissionContract
 import com.example.tapbot.domain.sevices.TapBotForegroundService
 import com.example.tapbot.domain.utils.isAccessibilityServiceEnabled
 import com.example.tapbot.domain.utils.requestAccessibilityPermission
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.example.tapbot.ui.navigation.Navigation
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
+//@InstallIn
 class MainActivity : AppCompatActivity() {
 
     private lateinit var overlayPermissionLauncher: ActivityResultLauncher<Unit>
@@ -36,21 +36,11 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-
-        val bg = findViewById<ConstraintLayout>(R.id.main)
-
-
-        bg.setOnClickListener {
-            bg.setBackgroundColor(Color.RED)
-        }
-
         overlayPermissionLauncher = registerForActivityResult(
             OverlayPermissionContract(this)
         ) { isGranted ->
             if (isGranted) {
                 startTapBotForegroundService()
-            }else {
-                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -65,20 +55,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             startTapBotForegroundService()
+        }
 
+        val composeView = findViewById<ComposeView>(R.id.composeView)
 
-
-            Toast.makeText(this@MainActivity, "TapBot is sending", Toast.LENGTH_SHORT).show()
-            CoroutineScope(Dispatchers.IO).launch {
-                delay(10000)
-                repeat(600) {
-                    delay(500)
-                    withContext(Dispatchers.Main) {
-                        triggerClick(500f, 700f)
-                    }
-                }
-            }
-
+        composeView.setContent {
+            Navigation()
         }
     }
 
@@ -86,17 +68,26 @@ class MainActivity : AppCompatActivity() {
         val serviceIntent = Intent(this, TapBotForegroundService::class.java)
         startService(serviceIntent)
     }
-
-    private fun triggerClick(x: Float, y: Float) {
-        Log.d("OverlayPermissionContract", "triggerClick: sendBroadcast")
-        val intent = Intent("com.example.tapbot.PERFORM_CLICK").apply {
-            putExtra("x", x)
-            putExtra("y", y)
-        }
-        sendBroadcast(intent)
-    }
-
-//    init {
-//        accessibilityPermissionLauncher.contract.parseResult(1, null)
-//    }
 }
+
+
+
+/*
+
+composeView.setOnClickListener {
+            if (isAccessibilityServiceEnabled()) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    delay(8000)
+                    repeat(600) {
+                        delay(50)
+                        withContext(Dispatchers.Main) {
+                            triggerClick(500f, 700f)
+                        }
+                    }
+                }
+            }else {
+                Toast.makeText(this, "Accessibility service is not enabled", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+ */

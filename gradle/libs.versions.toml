@@ -11,8 +11,11 @@ activity = "1.9.0"
 constraintlayout = "2.1.4"
 roomVersion = "2.5.2"
 daggerHiltVersion = "2.48.1"
+hiltNavigationVersion = "1.2.0"
 kspVersion = "1.8.10-1.0.9"
 coroutineVersion = "1.7.3"
+composeVersion = "1.4.0"
+composeViewModelVersion = "2.5.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -31,6 +34,14 @@ room-compiler =  { group = "androidx.room", name = "room-compiler", version.ref 
 hilt-android =  { group = "com.google.dagger", name = "hilt-android", version.ref = "daggerHiltVersion" }
 hilt-android-compiler =  { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "daggerHiltVersion" }
 hilt-gradle-plugin =  { group = "com.google.dagger", name = "hilt-android-gradle-plugin", version.ref = "daggerHiltVersion" }
+hilt-navigation-compose =  { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationVersion" }
+compose-foundation =  { group = "androidx.compose.foundation", name = "foundation", version.ref = "composeVersion" }
+compose-runtime =  { group = "androidx.compose.runtime", name = "runtime", version.ref = "composeVersion" }
+compose-ui =  { group = "androidx.compose.ui", name = "ui", version.ref = "composeVersion" }
+compose-ui-tooling =  { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "composeVersion" }
+compose-material =  { group = "androidx.compose.material", name = "material", version.ref = "composeVersion" }
+compose-activity =  { group = "androidx.activity", name = "activity-compose", version.ref = "composeVersion" }
+compose-lifecycle-viewmodel =  { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "composeViewModelVersion" }
 
 
 [plugins]
