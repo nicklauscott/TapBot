@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -148,5 +149,20 @@ fun CoroutineScope.work(context: Context, number: Int) {
             }
             delay(480000)
         }
+    }
+}
+
+
+@Composable
+fun OverlayTapBot(modifier: Modifier = Modifier) {
+    Column(
+        modifier = Modifier
+            .height(100.dp)
+            .width(400.dp)
+            .background(MaterialTheme.colors.background.copy(alpha = 0.4f))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(text = "Overlay", fontSize = 18.sp, color = MaterialTheme.colors.onBackground)
     }
 }

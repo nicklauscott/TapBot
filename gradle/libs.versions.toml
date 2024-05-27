@@ -16,6 +16,7 @@ kspVersion = "1.8.10-1.0.9"
 coroutineVersion = "1.7.3"
 composeVersion = "1.4.0"
 composeViewModelVersion = "2.5.1"
+androidLifeCycleVersion = "2.6.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,7 +43,7 @@ compose-ui-tooling =  { group = "androidx.compose.ui", name = "ui-tooling", vers
 compose-material =  { group = "androidx.compose.material", name = "material", version.ref = "composeVersion" }
 compose-activity =  { group = "androidx.activity", name = "activity-compose", version.ref = "composeVersion" }
 compose-lifecycle-viewmodel =  { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "composeViewModelVersion" }
-
+lifecycle-runtime-ktx =  { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidLifeCycleVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

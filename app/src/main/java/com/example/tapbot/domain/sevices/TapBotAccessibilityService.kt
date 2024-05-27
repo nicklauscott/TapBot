@@ -7,20 +7,37 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Path
+import android.graphics.PixelFormat
 import android.os.Build
-import android.os.Looper
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewTreeObserver
+import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
+import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
+import androidx.compose.ui.platform.ComposeView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.example.tapbot.R
 import com.example.tapbot.domain.utils.isAccessibilityServiceEnabled
+import com.example.tapbot.ui.MainActivity
+import com.example.tapbot.ui.screens.home.OverlayTapBot
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 class TapBotAccessibilityService: AccessibilityService() {
+
+    private var composeView: ComposeView? = null
+    private lateinit var windowManager: WindowManager
+    //private val lifecycleRegistry = LifecycleRegistry(this)
 
     private val clickReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -35,14 +52,49 @@ class TapBotAccessibilityService: AccessibilityService() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onServiceConnected() {
         super.onServiceConnected()
+        windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        //lifecycleRegistry.currentState = Lifecycle.State.STARTED
+        showOverlay()
         val filter = IntentFilter("com.example.tapbot.PERFORM_CLICK")
         registerReceiver(clickReceiver, filter, RECEIVER_NOT_EXPORTED)
         Log.d("MyAccessibilityService", "Service connected and receiver registered.")
     }
 
+    private fun showOverlay() {
+        composeView = ComposeView(this).apply {
+            setContent {
+                OverlayTapBot()
+            }
+        }
+
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            else WindowManager.LayoutParams.TYPE_PHONE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            PixelFormat.TRANSLUCENT
+        )
+
+        val lifecycleOwner = MyLifecycleOwner()
+        lifecycleOwner.performRestore(null)
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        composeView!!.setViewTreeLifecycleOwner(lifecycleOwner)
+        composeView!!.setViewTreeSavedStateRegistryOwner(lifecycleOwner)
+        windowManager.addView(composeView, params)
+
+    }
+
+    private fun removeOverlay() {
+        composeView?.let {
+            windowManager.removeView(it)
+            composeView = null
+        }
+    }
+
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-            if (isAccessibilityServiceEnabled()) { // isAccessibilityServiceEnabled()
+            if (isAccessibilityServiceEnabled()) {
                 Log.d("MyAccessibilityService", "AccessibilityEvent enable")
             }
         }
@@ -54,6 +106,8 @@ class TapBotAccessibilityService: AccessibilityService() {
 
     override fun onDestroy() {
         super.onDestroy()
+        removeOverlay()
+        //lifecycleRegistry.currentState = Lifecycle.State.DESTROYED
         unregisterReceiver(clickReceiver)
         Log.d("MyAccessibilityService", "Service destroyed and receiver unregistered.")
     }

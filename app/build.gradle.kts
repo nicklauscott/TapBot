@@ -77,6 +77,9 @@ dependencies {
     implementation(libs.compose.activity)
     implementation(libs.compose.lifecycle.viewmodel)
 
+    implementation(libs.lifecycle.runtime.ktx)
+
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
