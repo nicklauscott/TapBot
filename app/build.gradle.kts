@@ -57,6 +57,9 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     kapt(libs.hilt.android.compiler)
 
+    // Material3 Window size class and navigation suite
+    implementation(libs.material3.window)
+    implementation(libs.androidx.material3.navigation.suite)
 
     // Room Database
     implementation(libs.room.runtime)
@@ -73,11 +76,9 @@ dependencies {
     implementation(libs.compose.runtime)
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.tooling)
-    implementation(libs.compose.material)
+    implementation(libs.androidx.material3)
     implementation(libs.compose.activity)
     implementation(libs.compose.lifecycle.viewmodel)
-
-    implementation(libs.lifecycle.runtime.ktx)
 
 
     implementation(libs.androidx.core.ktx)

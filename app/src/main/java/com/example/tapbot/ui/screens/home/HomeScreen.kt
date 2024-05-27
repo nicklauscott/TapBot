@@ -1,6 +1,7 @@
 package com.example.tapbot.ui.screens.home
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,10 +15,10 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.tapbot.domain.utils.broadcastLoadConfig
 import com.example.tapbot.domain.utils.startTapBotForegroundService
 import com.example.tapbot.domain.utils.stopTapBotForegroundService
 import com.example.tapbot.domain.utils.triggerClick
@@ -43,8 +45,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @Composable
-fun HomeScreen(navController: NavController, viewModel: HomeScreenViewModel = hiltViewModel()) {
+fun HomeScreen(windowSizeClass: WindowSizeClass, navController: NavController, viewModel: HomeScreenViewModel = hiltViewModel()) {
+
     Test()
+
+
 }
 
 
@@ -62,13 +67,13 @@ fun Test(modifier: Modifier = Modifier) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.background.copy(alpha = 0.1f))
+            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.1f))
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Text(text = "Number of click", fontSize = 18.sp, color = MaterialTheme.colors.onBackground)
+        Text(text = "Number of click", fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(5.dp))
 
@@ -77,7 +82,7 @@ fun Test(modifier: Modifier = Modifier) {
                 .height(50.dp)
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(corner = CornerSize(4.dp)))
-                .background(MaterialTheme.colors.onPrimary.copy(alpha = 0.3f))
+                .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.3f))
                 .padding(vertical = 10.dp, horizontal = 5.dp),
             value = number.value,
             textStyle = TextStyle.Default.copy(fontSize = 20.sp),
@@ -90,7 +95,7 @@ fun Test(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(text = "Duration of delay, in seconds", fontSize = 18.sp, color = MaterialTheme.colors.onBackground)
+        Text(text = "Duration of delay, in seconds", fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(5.dp))
 
@@ -99,7 +104,7 @@ fun Test(modifier: Modifier = Modifier) {
                 .height(50.dp)
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(corner = CornerSize(4.dp)))
-                .background(MaterialTheme.colors.onPrimary.copy(alpha = 0.3f))
+                .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.3f))
                 .padding(vertical = 10.dp, horizontal = 5.dp),
             value = delay.value,
             textStyle = TextStyle.Default.copy(fontSize = 20.sp),
@@ -117,9 +122,12 @@ fun Test(modifier: Modifier = Modifier) {
             scope.launch(Dispatchers.IO) {
                 delay(delay.value.toInt() * 1000L)
                 work(context, number.value.toInt())
+
             }
+//            Log.d("SplashScreenViewModel.SplashScreenUiChannel", "OverlayTapBot: Load")
+            context.broadcastLoadConfig("Welcome")
         }) {
-            Text(text = "Start", fontSize = 18.sp, color = Color.White)
+            Text(text = "Load", fontSize = 18.sp, color = Color.White)
         }
 
 
@@ -155,14 +163,24 @@ fun CoroutineScope.work(context: Context, number: Int) {
 
 @Composable
 fun OverlayTapBot(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .height(100.dp)
             .width(400.dp)
-            .background(MaterialTheme.colors.background.copy(alpha = 0.4f))
+            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.4f))
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
     ) {
-        Text(text = "Overlay", fontSize = 18.sp, color = MaterialTheme.colors.onBackground)
+        Text(text = "Overlay", fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(onClick = {
+            Log.d("SplashScreenViewModel.SplashScreenUiChannel", "OverlayTapBot: Start")
+            context.triggerClick(500f, 700f)
+        }) {
+            Text(text = "Start", fontSize = 18.sp, color = Color.White)
+        }
     }
 }

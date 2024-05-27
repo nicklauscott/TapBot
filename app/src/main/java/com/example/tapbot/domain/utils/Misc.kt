@@ -21,3 +21,10 @@ fun Context.triggerClick(x: Float, y: Float) {
     }
     sendBroadcast(intent)
 }
+
+fun Context.broadcastLoadConfig(text: String) {
+    val intent = Intent("com.example.tapbot.LOAD.CONFIG").apply {
+        putExtra("text", text)
+    }
+    sendBroadcast(intent)
+}

@@ -3,11 +3,12 @@ package com.example.tapbot.ui
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
-import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -17,16 +18,15 @@ import com.example.tapbot.domain.sevices.TapBotForegroundService
 import com.example.tapbot.domain.utils.isAccessibilityServiceEnabled
 import com.example.tapbot.domain.utils.requestAccessibilityPermission
 import com.example.tapbot.ui.navigation.Navigation
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
+import com.example.tapbot.ui.theme.TapBotTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-//@InstallIn
 class MainActivity : AppCompatActivity() {
 
     private lateinit var overlayPermissionLauncher: ActivityResultLauncher<Unit>
 
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -61,7 +61,10 @@ class MainActivity : AppCompatActivity() {
         val composeView = findViewById<ComposeView>(R.id.composeView)
 
         composeView.setContent {
-            Navigation()
+            val windowSizeClass = calculateWindowSizeClass(activity = this)
+            TapBotTheme {
+                Navigation(windowSizeClass)
+            }
         }
     }
 
@@ -70,25 +73,3 @@ class MainActivity : AppCompatActivity() {
         startService(serviceIntent)
     }
 }
-
-
-
-/*
-
-composeView.setOnClickListener {
-            if (isAccessibilityServiceEnabled()) {
-                CoroutineScope(Dispatchers.IO).launch {
-                    delay(8000)
-                    repeat(600) {
-                        delay(50)
-                        withContext(Dispatchers.Main) {
-                            triggerClick(500f, 700f)
-                        }
-                    }
-                }
-            }else {
-                Toast.makeText(this, "Accessibility service is not enabled", Toast.LENGTH_SHORT).show()
-            }
-        }
-
- */
