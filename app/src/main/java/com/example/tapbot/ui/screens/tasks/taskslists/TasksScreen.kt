@@ -1,26 +1,17 @@
-package com.example.tapbot.ui.screens.tasks
+package com.example.tapbot.ui.screens.tasks.taskslists
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -33,14 +24,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.tapbot.ui.screens.util.percentOfScreenHeight
+import androidx.navigation.NavController
+import com.example.tapbot.ui.screens.tasks.navigation.TasksScreens
 import com.example.tapbot.ui.screens.util.percentOfScreenWidth
 import com.example.tapbot.ui.screens.util.rectangularModifier
 
 @Composable
-fun TasksScreen(windowSizeClass: WindowSizeClass) {
-
-    val viewModel: TaskScreenViewModel = hiltViewModel()
+fun TasksScreen(
+    windowSizeClass: WindowSizeClass,
+    viewModel: TaskScreenViewModel,
+    navController: NavController) {
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val isSearching = rememberSaveable { mutableStateOf(false) }
@@ -78,7 +71,9 @@ fun TasksScreen(windowSizeClass: WindowSizeClass) {
                 onclickSearch = { isSearching.value = true },
                 onSearchTextChange = { newText -> searchText.value = newText },
                 onDone = { keyboardController?.hide(); searchText.value = "" },
-                onClickCreateTask = {}, onTaskClick = {})
+                onClickCreateTask = {
+                    navController.navigate(TasksScreens.TaskDetails.withArg())
+                }, onTaskClick = {})
 
             WindowWidthSizeClass.Medium -> TaskScreenPortrait(
                 viewModel, searchText = searchText.value, isSearching = isSearching.value,
@@ -86,7 +81,9 @@ fun TasksScreen(windowSizeClass: WindowSizeClass) {
                 onclickSearch = { isSearching.value = true },
                 onSearchTextChange = { newText -> searchText.value = newText },
                 onDone = { keyboardController?.hide(); searchText.value = "" },
-                onClickCreateTask = {}, onTaskClick = {})
+                onClickCreateTask = {
+                    navController.navigate(TasksScreens.TaskDetails.withArg())
+                }, onTaskClick = {})
 
             WindowWidthSizeClass.Expanded -> TaskScreenLandscape(
                 viewModel, searchText = searchText.value, isSearching = isSearching.value,
@@ -94,7 +91,9 @@ fun TasksScreen(windowSizeClass: WindowSizeClass) {
                 onclickSearch = { isSearching.value = true },
                 onSearchTextChange = { newText -> searchText.value = newText },
                 onDone = { keyboardController?.hide(); searchText.value = "" },
-                onClickCreateTask = {}, onTaskClick = {}
+                onClickCreateTask = {
+                    navController.navigate(TasksScreens.TaskDetails.withArg())
+                }, onTaskClick = {}
             )
             else -> TaskScreenPortrait(
                 viewModel, searchText = searchText.value, isSearching = isSearching.value,
@@ -102,7 +101,9 @@ fun TasksScreen(windowSizeClass: WindowSizeClass) {
                 onclickSearch = { isSearching.value = true },
                 onSearchTextChange = { newText -> searchText.value = newText },
                 onDone = { keyboardController?.hide(); searchText.value = "" },
-                onClickCreateTask = {}, onTaskClick = {})
+                onClickCreateTask = {
+                    navController.navigate(TasksScreens.TaskDetails.withArg())
+                }, onTaskClick = {})
         }
     }
 }

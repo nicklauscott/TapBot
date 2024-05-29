@@ -23,9 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
@@ -53,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.tapbot.domain.usecases.services.ForegroundService
-import com.example.tapbot.domain.utils.broadcastLoadConfig
 import com.example.tapbot.domain.utils.startTapBotForegroundService
 import com.example.tapbot.domain.utils.stopTapBotForegroundService
 import com.example.tapbot.domain.utils.triggerClick
@@ -61,13 +58,11 @@ import com.example.tapbot.ui.screens.home.components.AppDestinations
 import com.example.tapbot.ui.screens.home.components.calculateLayoutType
 import com.example.tapbot.ui.screens.info.InfoScreen
 import com.example.tapbot.ui.screens.settings.SettingsScreen
-import com.example.tapbot.ui.screens.settings.SettingsViewModel
-import com.example.tapbot.ui.screens.settings.state_and_events.SettingScreenUiEvent
-import com.example.tapbot.ui.screens.tasks.TasksScreen
+import com.example.tapbot.ui.screens.tasks.navigation.TasksNavigation
+import com.example.tapbot.ui.screens.tasks.taskslists.TasksScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -127,7 +122,7 @@ fun HomeScreen(windowSizeClass: WindowSizeClass, navController: NavController) {
         }
     ) {
         when (currentDestination) {
-            AppDestinations.TASKS -> TasksScreen(windowSizeClass)
+            AppDestinations.TASKS -> TasksNavigation(windowSizeClass)
             AppDestinations.SETTINGS -> SettingsScreen(windowSizeClass)
             AppDestinations.INFO -> InfoScreen()
         }

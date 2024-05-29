@@ -1,4 +1,4 @@
-package com.example.tapbot.ui.screens.tasks
+package com.example.tapbot.ui.screens.tasks.taskslists
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -22,24 +21,25 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
-import com.example.tapbot.ui.screens.tasks.widgets.TasksGroupCell
-import com.example.tapbot.ui.screens.tasks.widgets.TasksTopBar
+import com.example.tapbot.ui.screens.tasks.taskslists.widgets.TasksGroupCell
+import com.example.tapbot.ui.screens.tasks.taskslists.widgets.TasksTopBar
 import com.example.tapbot.ui.screens.util.percentOfScreenHeight
 import com.example.tapbot.ui.screens.util.percentOfScreenWidth
 
 @Composable
-fun TaskScreenLandscape(
+fun TaskScreenPortrait(
     viewModel: TaskScreenViewModel, searchText: String, isSearching: Boolean,
     onSearchCleared: () -> Unit, onclickSearch: () -> Unit = { },
     onDone: () -> Unit = { }, onSearchTextChange: (String) -> Unit,
     onClickCreateTask: () -> Unit, onTaskClick: (String) -> Unit,
 ) {
+
+
     Scaffold(
         topBar = {
             Card(
@@ -51,8 +51,7 @@ fun TaskScreenLandscape(
                     containerColor = MaterialTheme.colorScheme.background
                 )
             ) {
-                TasksTopBar(modifier = Modifier.height(14.percentOfScreenHeight()),
-                    isSearch = isSearching, onclickSearch = onclickSearch, onDone = onDone,
+                TasksTopBar(isSearch = isSearching, onclickSearch = onclickSearch, onDone = onDone,
                     searchText = searchText, onCancelSearch = onSearchCleared, onSearchTextChange = onSearchTextChange)
             }
         },
@@ -84,7 +83,9 @@ fun TaskScreenLandscape(
     ) {
         when  {
             viewModel.state.value.loading -> {
-                Box(modifier = Modifier.fillMaxSize().padding(it)) {
+                Box(modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it)) {
                     CircularProgressIndicator()
                 }
             }
@@ -96,23 +97,24 @@ fun TaskScreenLandscape(
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+
                     item {
-                        Spacer(modifier = Modifier.height(16.percentOfScreenHeight()))
+                        Spacer(modifier = Modifier.height(9.percentOfScreenHeight()))
                     }
 
                     items(viewModel.state.value.tasks) { taskGroup ->
-                        TasksGroupCell(modifier = Modifier.height(10.percentOfScreenWidth())
-                            .padding(horizontal = 2.percentOfScreenWidth(), vertical = 0.3.percentOfScreenWidth()),
-                            taskGroup) { task ->
+                        TasksGroupCell(modifier = Modifier, taskGroup) { task ->
                             onTaskClick(task)
                         }
                     }
 
                     item {
-                        Spacer(modifier = Modifier.height(5.percentOfScreenHeight()))
+                        Spacer(modifier = Modifier.height(2.percentOfScreenHeight()))
                     }
                 }
             }
         }
     }
 }
+
+

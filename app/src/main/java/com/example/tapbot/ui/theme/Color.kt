@@ -54,3 +54,10 @@ val switchTrack_Dark = Color(0xFF8D9194)
 val switchBorderStroke_Dark = Color(0xFF8D9194)
 
 
+
+val click_action = Color(0xFF2E7D32)
+val delay_action = Color(0xFF00838F)
+val stopLoop_action = Color(0xFFC62828)
+val startLoop_action = Color(0xFF6A1B9A)
+
+

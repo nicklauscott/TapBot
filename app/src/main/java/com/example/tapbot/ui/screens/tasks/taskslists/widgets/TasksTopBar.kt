@@ -1,4 +1,4 @@
-package com.example.tapbot.ui.screens.tasks.widgets
+package com.example.tapbot.ui.screens.tasks.taskslists.widgets
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
