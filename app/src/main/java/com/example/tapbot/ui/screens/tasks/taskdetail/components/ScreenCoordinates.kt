@@ -28,7 +28,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tapbot.domain.model.ClickTask
-import com.example.tapbot.domain.model.Task
 import com.example.tapbot.ui.screens.util.percentOfScreenHeight
 import com.example.tapbot.ui.screens.util.percentOfScreenWidth
 
@@ -75,7 +74,7 @@ fun CoordinateCell(symbol: String, selectedItem: String, range: IntRange, assist
 
         Spacer(modifier = Modifier.width(1.percentOfScreenWidth()))
 
-        CustomSpinner(label = "", selectedItem = selectedItem, items = range, assist = assist) {
+        CustomSpinner(selectedItem = selectedItem, items = range, assist = assist) {
             onClick(it)
         }
     }
@@ -84,10 +83,10 @@ fun CoordinateCell(symbol: String, selectedItem: String, range: IntRange, assist
 
 @Composable
 fun CustomSpinner(
-    label: String, selectedItem: String,
-    items: IntRange,
+    selectedItem: String, items: IntRange,
     assist: Boolean = false,
-    onClick: (Int) -> Unit) {
+    onClick: (Int) -> Unit
+) {
     val expanded = remember {
         mutableStateOf(false)
     }
@@ -132,6 +131,177 @@ fun CustomSpinner(
                 onClick = {
                     expanded.value = false
                     onClick(item)
+                })
+        }
+
+    }
+}
+
+
+@Composable
+fun CustomSpinner(
+    modifier: Modifier = Modifier,
+    selectedItem: String,
+    items: List<Int>,
+    assist: Boolean = false,
+    onClick: (Int) -> Unit) {
+    val expanded = remember {
+        mutableStateOf(false)
+    }
+
+
+    Row(modifier = modifier.width(10.percentOfScreenWidth())
+        .height(5.percentOfScreenHeight())
+        .padding(vertical = 1.percentOfScreenHeight())
+        .clip(RoundedCornerShape(4.dp))
+        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
+        .clickable { expanded.value = true },
+        verticalAlignment = Alignment.CenterVertically) {
+        Column(modifier = Modifier
+            .weight(0.7f)
+            .fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center) {
+            Text(text = selectedItem,
+                fontSize = 18.sp,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.background)
+        }
+        Column(modifier = Modifier
+            .weight(0.3f),
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.Center) {
+            Icon(imageVector = Icons.Default.ArrowDropDown,
+                contentDescription = "Show more", tint = MaterialTheme.colorScheme.background)
+        }
+    }
+
+
+    DropdownMenu(expanded = expanded.value,
+        onDismissRequest = { expanded.value = false },
+        modifier = Modifier
+    ) {
+        items.forEach { item ->
+            DropdownMenuItem(
+                text = {
+                    Text(text = if (assist && item == 0) "Use Assist" else item.toString(),
+                        style = MaterialTheme.typography.headlineSmall) },
+                onClick = {
+                    expanded.value = false
+                    onClick(item)
+                })
+        }
+
+    }
+}
+
+
+
+@Composable
+fun CustomSpinner(
+    modifier: Modifier = Modifier,
+    selectedItem: String,
+    values: List<Any>,
+    onClick: (Any) -> Unit
+) {
+    val expanded = remember {
+        mutableStateOf(false)
+    }
+
+
+    Row(modifier = modifier.width(10.percentOfScreenWidth())
+        .height(5.percentOfScreenHeight())
+        .padding(vertical = 1.percentOfScreenHeight())
+        .clip(RoundedCornerShape(4.dp))
+        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
+        .clickable { expanded.value = true },
+        verticalAlignment = Alignment.CenterVertically) {
+        Column(modifier = Modifier
+            .weight(0.7f)
+            .fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center) {
+            Text(text = selectedItem.take(if (selectedItem.length == 4) 2 else 3),
+                fontSize = 18.sp,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.background)
+        }
+        Column(modifier = Modifier
+            .weight(0.3f),
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.Center) {
+            Icon(imageVector = Icons.Default.ArrowDropDown,
+                contentDescription = "Show more", tint = MaterialTheme.colorScheme.background)
+        }
+    }
+
+
+    DropdownMenu(expanded = expanded.value,
+        onDismissRequest = { expanded.value = false },
+        modifier = Modifier
+    ) {
+        values.forEach { item ->
+            DropdownMenuItem(
+                text = {
+                    Text(text = item.toString(),
+                        style = MaterialTheme.typography.headlineSmall) },
+                onClick = {
+                    expanded.value = false
+                    onClick(item)
+                })
+        }
+
+    }
+}
+
+@Composable
+fun CustomYesNoSpinner(
+    selectedItem: Int,
+    onClick: (Int) -> Unit) {
+
+    val expanded = remember {
+        mutableStateOf(false)
+    }
+
+    Row(modifier = Modifier.width(10.percentOfScreenWidth())
+        .height(5.percentOfScreenHeight())
+        .padding(vertical = 1.percentOfScreenHeight())
+        .clip(RoundedCornerShape(4.dp))
+        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f))
+        .clickable { expanded.value = true },
+        verticalAlignment = Alignment.CenterVertically) {
+        Column(modifier = Modifier
+            .weight(0.7f)
+            .fillMaxHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center) {
+            Text(text = if (selectedItem == 1) "Yes" else "No",
+                fontSize = 18.sp,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.background)
+        }
+        Column(modifier = Modifier
+            .weight(0.3f),
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.Center) {
+            Icon(imageVector = Icons.Default.ArrowDropDown,
+                contentDescription = "Show more", tint = MaterialTheme.colorScheme.background)
+        }
+    }
+
+
+    DropdownMenu(expanded = expanded.value,
+        onDismissRequest = { expanded.value = false },
+        modifier = Modifier
+    ) {
+        listOf("Yes", "No").forEach { item ->
+            DropdownMenuItem(
+                text = {
+                    Text(text = item,
+                        style = MaterialTheme.typography.headlineSmall) },
+                onClick = {
+                    expanded.value = false
+                    onClick(if (item == "Yes") 1 else 0)
                 })
         }
 

@@ -3,7 +3,6 @@ package com.example.tapbot.ui.screens.tasks.taskdetail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,14 +14,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -38,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -48,7 +44,6 @@ import com.example.tapbot.domain.model.ClickTask
 import com.example.tapbot.domain.model.DelayTask
 import com.example.tapbot.domain.model.StartLoop
 import com.example.tapbot.domain.model.StopLoop
-import com.example.tapbot.ui.screens.settings.widgets.DelayCell
 import com.example.tapbot.ui.screens.tasks.taskdetail.components.ClickActionCell
 import com.example.tapbot.ui.screens.tasks.taskdetail.components.DelayActionCell
 import com.example.tapbot.ui.screens.tasks.taskdetail.components.StartLoopActionCell
@@ -75,14 +70,23 @@ fun TasksDetailPortrait(
     val showBottomSheet = remember { mutableStateOf(false) }
 
     val errorMessage = remember { mutableStateOf("") }
+    val isError = remember { mutableStateOf(true) }
 
     val tasks by viewModel.state
 
     LaunchedEffect(viewModel) {
         viewModel.channel.collectLatest {
             when (it) {
-                is TaskDetailViewModel.TaskDetailUiChannel.AddingTaskError -> {
+                is TaskDetailViewModel.TaskDetailUiChannel.TaskMangerError -> {
                     errorMessage.value = it.message
+                    isError.value = true
+                    snackBarHostState.currentSnackbarData?.dismiss()
+                    snackBarHostState.showSnackbar("")
+                }
+
+                is TaskDetailViewModel.TaskDetailUiChannel.TaskMangerWarning -> {
+                    errorMessage.value = it.message
+                    isError.value = false
                     snackBarHostState.currentSnackbarData?.dismiss()
                     snackBarHostState.showSnackbar("")
                 }
@@ -114,7 +118,8 @@ fun TasksDetailPortrait(
             {
                 Row(
                     modifier = rectangularModifier(
-                        background = MaterialTheme.colorScheme.error,
+                        background = if (isError.value) MaterialTheme.colorScheme.error
+                            else Color.Yellow.copy(alpha = 0.3f),
                         height = 40.dp,
                         width = 100.percentOfScreenWidth(),
                         padding = 2.percentOfScreenWidth()),
@@ -219,7 +224,8 @@ fun TasksDetailPortrait(
                             }
 
                             if (task is StopLoop) {
-                                StopLoopActionCell(task = task, onEditTask = { newTask ->
+                                val parentLoop = tasks.taskList.filterIsInstance<StartLoop>().find { it.id == task.prentLoopId }
+                                StopLoopActionCell(task = task, startLoop = parentLoop, onEditTask = { newTask ->
                                     viewModel.onEvent(TaskDetailScreenUiEvent.EditAction(index, newTask))
                                 }) {
                                     viewModel.onEvent(TaskDetailScreenUiEvent.DeleteAction(index))

@@ -13,11 +13,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.tapbot.domain.model.ClickTask
 import com.example.tapbot.ui.screens.settings.widgets.ClickCell
 import com.example.tapbot.ui.screens.settings.widgets.DelayCell
@@ -32,10 +35,24 @@ fun ClickActionCell(modifier: Modifier = Modifier, task: ClickTask,
         modifier = modifier
             .padding(vertical = 0.4.percentOfScreenHeight())
             .fillMaxWidth()
-            .height(10.percentOfScreenHeight())
             .clip(RoundedCornerShape(4.dp))
-            .background(click_action.copy(alpha = 0.2f)),
+            .background(click_action.copy(alpha = 0.2f))
+            .padding(vertical = 1.percentOfScreenHeight())
     ) {
+
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.percentOfScreenWidth(), vertical = 0.6.percentOfScreenHeight()),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+        ) {
+            Text(text = "Click Action", style = MaterialTheme.typography.bodyMedium,
+                maxLines = 2, fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.5f),
+            )
+        }
+
         Row(modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 1.percentOfScreenWidth()),

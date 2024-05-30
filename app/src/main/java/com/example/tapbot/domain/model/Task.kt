@@ -18,72 +18,42 @@ data class TaskGroup(
     val iconId: Int = -1
 )
 
-
 data class ClickTask(
     val id: String = UUID.randomUUID().toString(),
     val tasGroupId: String = "",
     val taskNumberInTheList: Int = 0,
-
-    val standaloneTask: Boolean = true,
-    val parentTaskId: String? = null,
-    val childIdIndexId: Int? = null,
 
     val delayBeforeTask: Int? = 3,
     val x: Float = 50f,
     val y: Float = 70f,
     val delayBetweenClicks: Int = 1,
     val clickCount: Int = 1
-): Task()
+) : Task()
 
 data class DelayTask(
     val id: String = UUID.randomUUID().toString(),
     val tasGroupId: String = "",
     val taskNumberInTheList: Int = 0,
 
-    val standaloneTask: Boolean = true,
-    val parentTaskId: String? = null,
-    val childIdIndexId: Int? = null,
-
     val delayHour: Int = 0,
     val delayMinute: Int = 0,
     val delaySecond: Int = 1,
-): Task()
-
-data class RepeatTask(
-    val id: String = UUID.randomUUID().toString(),
-    val tasGroupId: String = "",
-    val taskNumberInTheList: Int = 0,
-
-    val standaloneTask: Boolean = true,
-    val parentTaskId: String? = null,
-    val childIdIndexId: Int? = null,
-
-    val repeatCount: Int = 1
-)
+) : Task()
 
 data class StartLoop(
     val id: String = UUID.randomUUID().toString(),
     val tasGroupId: String = "",
     val taskNumberInTheList: Int = 0,
 
-    val standaloneTask: Boolean = true,
-    val parentTaskId: String? = null,
-    val childIdIndexId: Int? = null,
-
     val time: Int = 0,
-    val count: Int = 0,
-    val secondCount: Int = 0,
-
-    val childrenTaskIds: List<String> = emptyList()
-): Task() {
+    val count: Int = 1,
+) : Task() {
     val enableTimeCondition: Boolean
-        get() = time > 0
+        get() = time == 1
 
     val enableCountCondition: Boolean
-        get() = count > 0
+        get() = count == 1
 
-    val enableSecondCountCondition: Boolean
-        get() = secondCount > 0
 }
 
 data class StopLoop(
@@ -91,20 +61,88 @@ data class StopLoop(
     val tasGroupId: String = "",
     val taskNumberInTheList: Int = 0,
 
-    val parentTaskId: String? = null,
-    val childIdIndexId: Int? = null,
-
+    val prentLoopId: String? = null,
     val time: Int = 0,
     val count: Int = 0,
-    val secondCount: Int = 0,
-): Task() {
-    val enableTimeCondition: Boolean
-        get() = time > 0
+    val optionalVariable: Int = 0,
 
-    val enableCountCondition: Boolean
-        get() = count > 0
+    // advanced
+    val useOneCondition: ConditionWithJoiner? = null,
 
-    val enableSecondCountCondition: Boolean
-        get() = secondCount > 0
+    ) : Task() {
+
+    enum class Operator(val value: String) {
+        Equals(value = "="),
+        NotEquals(value = "!="),
+        LessThan(value = "<"),
+        LessThanEquals("<="),
+        GreaterThan(value = ">"),
+        GreaterThanEquals(value = "=>")
+    }
+
+    enum class Types {
+        Time,
+        Count,
+    }
+
+
+    data class Condition(
+        val firstType: Types,
+        val condition: Operator,
+        val secondType: Types,
+    )
+
+    private fun getType(type: Types): Int {
+        return when (type) {
+            Types.Time -> time
+            Types.Count -> count
+        }
+    }
+
+    enum class Joiners {
+        AND,
+        OR
+    }
+
+    data class ConditionWithJoiner(
+        val firstCondition: Condition,
+        val joiners: Joiners,
+        val secondCondition: Condition
+    )
+
+    private fun runCondition(condition: Condition): Boolean{
+        return when (condition.condition) {
+            Operator.Equals -> {
+                 (getType(condition.firstType) == getType(condition.secondType))
+            }
+            Operator.NotEquals -> {
+                (getType(condition.firstType) != getType(condition.secondType))
+            }
+            Operator.LessThan -> {
+                (getType(condition.firstType) < getType(condition.secondType))
+            }
+            Operator.LessThanEquals -> {
+
+                (getType(condition.firstType) <= getType(condition.secondType))
+            }
+            Operator.GreaterThan -> {
+
+                (getType(condition.firstType) > getType(condition.secondType))
+            }
+            Operator.GreaterThanEquals -> {
+
+                (getType(condition.firstType) >= getType(condition.secondType))
+            }
+        }
+    }
+
+    fun ConditionWithJoiner.check(): Boolean{
+        return when (joiners) {
+            Joiners.AND -> runCondition(firstCondition)
+                    && runCondition(secondCondition)
+            Joiners.OR -> runCondition(firstCondition)
+                    || runCondition(secondCondition)
+        }
+    }
 }
 

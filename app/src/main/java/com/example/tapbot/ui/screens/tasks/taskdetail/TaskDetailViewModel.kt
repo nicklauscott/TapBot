@@ -8,18 +8,15 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tapbot.domain.model.Actions
-import com.example.tapbot.domain.model.ClickTask
-import com.example.tapbot.domain.model.DelayTask
-import com.example.tapbot.domain.model.StartLoop
-import com.example.tapbot.domain.model.StopLoop
 import com.example.tapbot.domain.model.Task
 import com.example.tapbot.domain.usecases.taskbuilder.TaskBuilder
+import com.example.tapbot.domain.usecases.taskbuilder.TaskManagerError
+import com.example.tapbot.domain.usecases.taskbuilder.TaskManagerWarning
 import com.example.tapbot.ui.screens.tasks.taskdetail.state_and_events.TaskDetailScreenState
 import com.example.tapbot.ui.screens.tasks.taskdetail.state_and_events.TaskDetailScreenUiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -58,6 +55,7 @@ class TaskDetailViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             val taskList = taskBuilder.build()
             // save to database
+
             withContext(Dispatchers.Main) {
                 _state.value = state.value.copy(saving = false)
                 state.value.update(state.value.taskGroup, state.value.taskList)
@@ -66,11 +64,32 @@ class TaskDetailViewModel @Inject constructor(
     }
 
     private fun deleteTask(index: Int) {
-        state.value.taskList.toMutableList().also {
-            it.removeAt(index)
-            state.value.update(state.value.taskGroup, it)
-            _state.value = state.value.copy(taskList = it)
-            taskBuilder.deleteTask(index) // --
+        try {
+            if (taskBuilder.canDeleteTask(index)) {
+                state.value.taskList.toMutableList().also {
+                    it.removeAt(index)
+                    state.value.update(state.value.taskGroup, it)
+                    _state.value = state.value.copy(taskList = it)
+                }
+                taskBuilder.deleteTask(index)
+            }
+        }catch (warning: TaskManagerWarning) {
+            state.value.taskList.toMutableList().also {
+                it.removeAt(index)
+                state.value.update(state.value.taskGroup, it)
+                _state.value = state.value.copy(taskList = it)
+            }
+            taskBuilder.deleteTask(index)
+
+            viewModelScope.launch {
+                _channel.send(TaskDetailUiChannel.TaskMangerWarning(warning.message.toString()))
+            }
+        }catch (ex: TaskManagerError) {
+            viewModelScope.launch {
+                _channel.send(TaskDetailUiChannel.TaskMangerError(ex.message.toString()))
+            }
+        }catch (ex: Exception) {
+            Log.e("TaskDetailViewModel", ex.message.toString())
         }
     }
 
@@ -87,22 +106,29 @@ class TaskDetailViewModel @Inject constructor(
         try {
              when (task) {
                  Actions.CLICK -> taskBuilder.click()
-                 Actions.DELAY -> taskBuilder.delay(delay = 1)
+                 Actions.DELAY -> taskBuilder.delay()
                  Actions.LOOP -> taskBuilder.loop()
                  Actions.STOP_LOOP -> taskBuilder.stopLoop()
              }
             state.value.update(state.value.taskGroup, taskBuilder.getTempTaskList())
             _state.value = state.value.copy(taskList = taskBuilder.getTempTaskList())
-        }catch (ex: Exception) {
+        }catch (ex: TaskManagerError) {
             viewModelScope.launch {
-                _channel.send(TaskDetailUiChannel.AddingTaskError(ex.message.toString()))
+                _channel.send(TaskDetailUiChannel.TaskMangerError(ex.message.toString()))
             }
+        }catch (warning: TaskManagerWarning) {
+            viewModelScope.launch {
+                _channel.send(TaskDetailUiChannel.TaskMangerWarning(warning.message.toString()))
+            }
+        }catch (ex: Exception) {
+            Log.e("TaskDetailViewModel", ex.message.toString())
         }
     }
 
 
     sealed class TaskDetailUiChannel {
-        data class AddingTaskError(val message: String): TaskDetailUiChannel()
+        data class TaskMangerError(val message: String): TaskDetailUiChannel()
+        data class TaskMangerWarning(val message: String): TaskDetailUiChannel()
     }
 
 

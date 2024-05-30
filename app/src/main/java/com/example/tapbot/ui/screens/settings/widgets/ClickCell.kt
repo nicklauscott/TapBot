@@ -37,7 +37,7 @@ fun ClickCell(label: String, task: ClickTask, range: IntRange, onClick: (Int) ->
                 .padding(horizontal = 1.percentOfScreenWidth()),
             horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically
         ) {
-            CustomSpinner(label = "", selectedItem = task.clickCount.toString(), items = range, assist = false) {
+            CustomSpinner(selectedItem = task.clickCount.toString(), items = range, assist = false) {
                 onClick(it)
             }
         }

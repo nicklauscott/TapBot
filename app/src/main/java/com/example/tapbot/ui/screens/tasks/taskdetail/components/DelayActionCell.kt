@@ -13,11 +13,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.tapbot.domain.model.DelayTask
 import com.example.tapbot.ui.screens.settings.widgets.DelayCell
 import com.example.tapbot.ui.screens.util.percentOfScreenHeight
@@ -33,8 +36,23 @@ fun DelayActionCell(modifier: Modifier = Modifier, task: DelayTask, onEditTask: 
             .fillMaxWidth()
             .height(10.percentOfScreenHeight())
             .clip(RoundedCornerShape(4.dp))
-            .background(delay_action.copy(alpha = 0.2f)),
+            .background(delay_action.copy(alpha = 0.2f))
+            .padding(vertical = 1.percentOfScreenHeight())
     ) {
+
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.percentOfScreenWidth()),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+        ) {
+            Text(text = "Delay Action", style = MaterialTheme.typography.bodyMedium,
+                maxLines = 2, fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.5f),
+            )
+        }
+
         Row(
             modifier = modifier
                 .fillMaxSize()
