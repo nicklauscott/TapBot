@@ -19,7 +19,7 @@ import com.example.tapbot.ui.screens.tasks.taskdetail.components.CustomSpinner
 import com.example.tapbot.ui.screens.util.percentOfScreenWidth
 
 @Composable
-fun DelayCell(label: String, delay: Int, delayType: String, range: IntRange, onClick: (Int) -> Unit) {
+fun DelayCell(label: String, delay: Int, delayType: String, range: List<Int>, onClick: (Int) -> Unit) {
     Column(
         modifier = Modifier.padding(horizontal = 1.percentOfScreenWidth()),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceBetween

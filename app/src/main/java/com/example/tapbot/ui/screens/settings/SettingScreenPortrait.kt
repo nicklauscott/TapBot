@@ -4,9 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,14 +16,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.example.tapbot.R
-import com.example.tapbot.domain.activityresult.OverlayPermissionContract
-import com.example.tapbot.domain.usecases.services.ForegroundService
+import com.example.tapbot.ui.sevices.ForegroundService
 import com.example.tapbot.ui.screens.settings.state_and_events.SettingScreenUiEvent
 import com.example.tapbot.ui.screens.settings.widgets.EnableMainFeature
 import com.example.tapbot.ui.screens.settings.widgets.SettingCell

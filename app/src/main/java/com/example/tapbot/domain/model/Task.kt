@@ -11,16 +11,22 @@ enum class Actions(val value: String) {
 
 sealed class Task
 
+data class TaskGroupList(
+    val taskGroup: TaskGroup? = null,
+    val tasks: List<Task> = emptyList()
+)
+
 data class TaskGroup(
-    val tasGroupId: String = "",
+    val taskGroupId: String = "",
     val name: String = "",
     val description: String = "",
+    val favorite: Boolean = false,
     val iconId: Int = -1
 )
 
 data class ClickTask(
     val id: String = UUID.randomUUID().toString(),
-    val tasGroupId: String = "",
+    val taskGroupId: String = "",
     val taskNumberInTheList: Int = 0,
 
     val delayBeforeTask: Int? = 3,
@@ -32,17 +38,23 @@ data class ClickTask(
 
 data class DelayTask(
     val id: String = UUID.randomUUID().toString(),
-    val tasGroupId: String = "",
+    val taskGroupId: String = "",
     val taskNumberInTheList: Int = 0,
 
     val delayHour: Int = 0,
     val delayMinute: Int = 0,
     val delaySecond: Int = 1,
-) : Task()
+) : Task()  {
+
+    fun getDelay(): Long {
+        return (delayHour * 3600 + delayMinute * 60 + delaySecond) * 1000L
+    }
+
+}
 
 data class StartLoop(
     val id: String = UUID.randomUUID().toString(),
-    val tasGroupId: String = "",
+    val taskGroupId: String = "",
     val taskNumberInTheList: Int = 0,
 
     val time: Int = 0,
@@ -58,7 +70,7 @@ data class StartLoop(
 
 data class StopLoop(
     val id: String = UUID.randomUUID().toString(),
-    val tasGroupId: String = "",
+    val taskGroupId: String = "",
     val taskNumberInTheList: Int = 0,
 
     val prentLoopId: String? = null,
@@ -67,9 +79,20 @@ data class StopLoop(
     val optionalVariable: Int = 0,
 
     // advanced
-    val useOneCondition: ConditionWithJoiner? = null,
+    val useOneCondition: StopLoopCondition.ConditionWithJoiner? = null,
 
     ) : Task() {
+
+        val enableTimeCondition: Boolean
+        get() = time != 0
+
+        val enableCountCondition: Boolean
+        get() = count != 0
+}
+
+
+
+object StopLoopCondition {
 
     enum class Operator(val value: String) {
         Equals(value = "="),
@@ -80,24 +103,6 @@ data class StopLoop(
         GreaterThanEquals(value = "=>")
     }
 
-    enum class Types {
-        Time,
-        Count,
-    }
-
-
-    data class Condition(
-        val firstType: Types,
-        val condition: Operator,
-        val secondType: Types,
-    )
-
-    private fun getType(type: Types): Int {
-        return when (type) {
-            Types.Time -> time
-            Types.Count -> count
-        }
-    }
 
     enum class Joiners {
         AND,
@@ -105,44 +110,97 @@ data class StopLoop(
     }
 
     data class ConditionWithJoiner(
-        val firstCondition: Condition,
+        val firstConditionOperator: Operator,
         val joiners: Joiners,
-        val secondCondition: Condition
+        val secondConditionOperator: Operator
     )
 
-    private fun runCondition(condition: Condition): Boolean{
+    data class Comparator(
+        val first: Boolean,
+        val joiners: Joiners,
+        val second: Boolean,
+    )
+
+    fun check(comparator: Comparator): Boolean{
+        return when (comparator.joiners) {
+            Joiners.AND -> comparator.first && comparator.second
+            Joiners.OR -> comparator.first || comparator.second
+        }
+    }
+
+    data class LongChecker(
+        val firstType: Long,
+        val condition: Operator,
+        val secondType: Long,
+    )
+
+    data class IntChecker(
+        val firstType: Int,
+        val condition: Operator,
+        val secondType: Int,
+    )
+
+    private fun runConditionLong(condition: LongChecker): Boolean{
         return when (condition.condition) {
             Operator.Equals -> {
-                 (getType(condition.firstType) == getType(condition.secondType))
+                condition.firstType == condition.secondType // getType(condition.secondType)
             }
             Operator.NotEquals -> {
-                (getType(condition.firstType) != getType(condition.secondType))
+                condition.firstType != condition.secondType
             }
             Operator.LessThan -> {
-                (getType(condition.firstType) < getType(condition.secondType))
+                condition.firstType < condition.secondType
             }
             Operator.LessThanEquals -> {
 
-                (getType(condition.firstType) <= getType(condition.secondType))
+                condition.firstType <= condition.secondType
             }
             Operator.GreaterThan -> {
 
-                (getType(condition.firstType) > getType(condition.secondType))
+                condition.firstType > condition.secondType
             }
             Operator.GreaterThanEquals -> {
 
-                (getType(condition.firstType) >= getType(condition.secondType))
+                condition.firstType >= condition.secondType
             }
         }
     }
 
-    fun ConditionWithJoiner.check(): Boolean{
-        return when (joiners) {
-            Joiners.AND -> runCondition(firstCondition)
-                    && runCondition(secondCondition)
-            Joiners.OR -> runCondition(firstCondition)
-                    || runCondition(secondCondition)
+    fun check(time: Int, operator: Operator, loopTime: Long): Boolean{
+        val checker = LongChecker(firstType = time * 1000L, condition = operator, secondType = loopTime)
+        return runConditionLong(checker)
+    }
+
+    private fun runConditionInt(condition: IntChecker): Boolean{
+        return when (condition.condition) {
+            Operator.Equals -> {
+                condition.firstType == condition.secondType // getType(condition.secondType)
+            }
+            Operator.NotEquals -> {
+                condition.firstType != condition.secondType
+            }
+            Operator.LessThan -> {
+                condition.firstType < condition.secondType
+            }
+            Operator.LessThanEquals -> {
+
+                condition.firstType <= condition.secondType
+            }
+            Operator.GreaterThan -> {
+
+                condition.firstType > condition.secondType
+            }
+            Operator.GreaterThanEquals -> {
+
+                condition.firstType >= condition.secondType
+            }
         }
     }
+
+    fun check(count: Int, operator: Operator, loopCount: Int): Boolean{
+        val checker = IntChecker(firstType = count, condition = operator, secondType = loopCount)
+        return runConditionInt(checker)
+    }
+
 }
 

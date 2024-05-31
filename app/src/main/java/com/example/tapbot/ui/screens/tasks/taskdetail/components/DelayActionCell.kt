@@ -61,14 +61,14 @@ fun DelayActionCell(modifier: Modifier = Modifier, task: DelayTask, onEditTask: 
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            DelayCell(label = "Hours", delay = task.delayHour, delayType = "Hr", range = 0..24) {
+            DelayCell(label = "Hours", delay = task.delayHour, delayType = "Hr", range =(0..24).toList()) {
                 onEditTask(task.copy(delayHour = it))
             }
-            DelayCell(label = "Minutes", delay = task.delayMinute, delayType = "Min", range = 0..59
+            DelayCell(label = "Minutes", delay = task.delayMinute, delayType = "Min", range = (0..59).toList()
             ) {
                 onEditTask(task.copy(delayMinute = it))
             }
-            DelayCell(label = "Seconds", delay = task.delaySecond, delayType = "Sec", range = 0..59
+            DelayCell(label = "Seconds", delay = task.delaySecond, delayType = "Sec", range = (1..100).toList()
             ) {
                 onEditTask(task.copy(delaySecond = it))
             }

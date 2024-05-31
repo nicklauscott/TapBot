@@ -1,4 +1,4 @@
-package com.example.tapbot.domain.sevices
+package com.example.tapbot.ui.sevices
 
 import android.app.Notification
 import android.app.NotificationChannel

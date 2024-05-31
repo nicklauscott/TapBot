@@ -1,4 +1,4 @@
-package com.example.tapbot.domain.sevices
+package com.example.tapbot.ui.sevices
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
@@ -92,11 +92,7 @@ class TapBotAccessibilityService: AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-//        if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-//            if (isAccessibilityServiceEnabled()) {
-//            }
-//        }
-        // isAccessibilityServiceEnabled()
+
     }
 
     override fun onInterrupt() {
@@ -134,4 +130,5 @@ class TapBotAccessibilityService: AccessibilityService() {
             }, null)
         }
     }
+
 }

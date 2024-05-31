@@ -18,6 +18,7 @@ composeVersion = "1.4.0"
 composeViewModelVersion = "2.5.1"
 material3Version = "1.2.1"
 adaptiveNavigationVersion = "1.0.0-alpha05"
+gsonVersion = "2.10.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -46,6 +47,7 @@ compose-activity =  { group = "androidx.activity", name = "activity-compose", ve
 compose-lifecycle-viewmodel =  { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "composeViewModelVersion" }
 material3-window =  { group = "androidx.compose.material3", name = "material3-window-size-class", version.ref = "material3Version" }
 androidx-material3-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite", version.ref = "adaptiveNavigationVersion" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gsonVersion" }
 
 
 [plugins]

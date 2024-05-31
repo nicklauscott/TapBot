@@ -9,7 +9,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tapbot.domain.model.Actions
 import com.example.tapbot.domain.model.Task
+import com.example.tapbot.domain.usecases.DeleteActions
+import com.example.tapbot.domain.usecases.GetTaskGroupAction
+import com.example.tapbot.domain.usecases.SaveActions
 import com.example.tapbot.domain.usecases.taskbuilder.TaskBuilder
+import com.example.tapbot.domain.usecases.taskbuilder.TaskManager
 import com.example.tapbot.domain.usecases.taskbuilder.TaskManagerError
 import com.example.tapbot.domain.usecases.taskbuilder.TaskManagerWarning
 import com.example.tapbot.ui.screens.tasks.taskdetail.state_and_events.TaskDetailScreenState
@@ -24,6 +28,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TaskDetailViewModel @Inject constructor(
+    private val getTaskGroupAction: GetTaskGroupAction,
+    private val saveActions: SaveActions,
+    private val deleteActions: DeleteActions,
     saveStateHandle: SavedStateHandle
 ): ViewModel() {
 
@@ -36,8 +43,18 @@ class TaskDetailViewModel @Inject constructor(
     val channel = _channel.receiveAsFlow()
 
     init {
-        val id = saveStateHandle.get<String>("taskId")
-        state.value.update(null, emptyList())
+        val taskGroupId = saveStateHandle.get<String>("taskId")
+        _state.value = state.value.copy(loading = true)
+        viewModelScope.launch(Dispatchers.IO) {
+            taskGroupId?.let { id ->
+                getTaskGroupAction(id).collect {
+                    withContext(Dispatchers.Main) {
+                        _state.value = state.value.copy(loading = false, taskGroup = it.taskGroup, taskList = it.tasks)
+                        state.value.update(taskGroup = it.taskGroup, taskList = it.tasks)
+                    }
+                }
+            }
+        }
     }
 
     fun onEvent(event: TaskDetailScreenUiEvent) {
@@ -46,16 +63,25 @@ class TaskDetailViewModel @Inject constructor(
             is TaskDetailScreenUiEvent.DeleteAction -> deleteTask(event.taskIndex)
             is TaskDetailScreenUiEvent.EditAction -> editTask(event.index, event.task)
             TaskDetailScreenUiEvent.SaveTask -> save()
-            TaskDetailScreenUiEvent.PlayTask -> { }
+            TaskDetailScreenUiEvent.PlayTask -> play()
+        }
+    }
+
+    private fun play() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val taskList = taskBuilder.getActions()
+            _channel.send(TaskDetailUiChannel.RunActions(taskList))
         }
     }
 
     private fun save() {
         _state.value = state.value.copy(saving = true)
         viewModelScope.launch(Dispatchers.IO) {
-            val taskList = taskBuilder.build()
-            // save to database
 
+            // save to database
+            state.value.taskGroup?.let { saveActions(it, taskBuilder.build()) }
+
+            // update state
             withContext(Dispatchers.Main) {
                 _state.value = state.value.copy(saving = false)
                 state.value.update(state.value.taskGroup, state.value.taskList)
@@ -129,6 +155,7 @@ class TaskDetailViewModel @Inject constructor(
     sealed class TaskDetailUiChannel {
         data class TaskMangerError(val message: String): TaskDetailUiChannel()
         data class TaskMangerWarning(val message: String): TaskDetailUiChannel()
+        data class RunActions(val actions: List<TaskManager.Action>): TaskDetailUiChannel()
     }
 
 

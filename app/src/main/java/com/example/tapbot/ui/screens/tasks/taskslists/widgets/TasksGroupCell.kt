@@ -36,7 +36,7 @@ fun TasksGroupCell(modifier: Modifier = Modifier, taskGroup: TaskGroup, onClick:
             containerColor = MaterialTheme.colorScheme.inverseSurface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        onClick = { onClick(taskGroup.tasGroupId) }
+        onClick = { onClick(taskGroup.taskGroupId) }
     ) {
         Column(
             modifier = Modifier

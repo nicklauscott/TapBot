@@ -38,33 +38,53 @@ class TaskBuilder {
         return taskManager.getTasks()
     }
 
+    fun getActions(): List<TaskManager.Action> {
+        taskManager.buildTasks().also { return taskManager.buildAction() }
+    }
+
     fun getTempTaskList(): List<Task> {
         return taskManager.getTasks()
     }
 
     fun click(): TaskBuilder {
-        taskManager.addTask(ClickTask(tasGroupId = tasGroupId).also { lastTask = it })
+        taskManager.addTask(ClickTask(taskGroupId = tasGroupId).also { lastTask = it })
             .also { return this }
     }
 
     fun delay(): TaskBuilder {
-        taskManager.addTask(DelayTask(tasGroupId = tasGroupId).also { lastTask = it })
+        taskManager.addTask(DelayTask(taskGroupId = tasGroupId).also { lastTask = it })
         return this
     }
 
     fun stopLoop(): TaskBuilder {
         if (startLoopCount == 0) throw TaskManagerError("No loop to stop")
         if (lastTask is StopLoop || lastTask is StartLoop) throw TaskManagerError("Stop loop should not be called after another stop or start loop")
-        taskManager.addTask(StopLoop(tasGroupId = tasGroupId).also { lastTask = it })
+        taskManager.addTask(StopLoop(taskGroupId = tasGroupId).also { lastTask = it })
         return this
     }
 
     fun loop(): TaskBuilder {
-        taskManager.addTask(StartLoop(tasGroupId = tasGroupId)
+        taskManager.addTask(StartLoop(taskGroupId = tasGroupId)
                 .also { lastTask = it; startLoopCount++ })
         return this
     }
 
+
+}
+
+
+fun main() {
+    val tasks = TaskBuilder().builder()
+        .click().click().delay()
+        .loop().click().delay().stopLoop()
+        .loop().click().delay().stopLoop()
+        .delay().click().getActions()
+
+    //tasks.runTask()
+
+    tasks.forEach {
+        println(it)
+    }
 }
 
 

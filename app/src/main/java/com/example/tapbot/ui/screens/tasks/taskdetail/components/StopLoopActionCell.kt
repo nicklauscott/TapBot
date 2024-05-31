@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -27,10 +26,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.tapbot.domain.model.StartLoop
+import com.example.tapbot.domain.model.StopLoopCondition
 import com.example.tapbot.domain.model.StopLoop
 import com.example.tapbot.ui.screens.settings.widgets.StopLoopValueCell
 import com.example.tapbot.ui.screens.util.percentOfScreenHeight
@@ -109,23 +108,11 @@ fun StopLoopActionCell(modifier: Modifier = Modifier, task: StopLoop, startLoop:
                     ),
                 verticalArrangement = Arrangement.spacedBy(1.percentOfScreenHeight())) {
 
-                val firstCondition = StopLoop.Condition(
-                    firstType  = StopLoop.Types.Time,
-                    condition = StopLoop.Operator.GreaterThan,
-                    secondType = StopLoop.Types.Time,
-                )
-
-                val secondCondition = StopLoop.Condition(
-                    firstType  = StopLoop.Types.Time,
-                    condition = StopLoop.Operator.GreaterThan,
-                    secondType = StopLoop.Types.Time,
-                )
-
                 if (task.useOneCondition == null) {
-                    useOneCondition.value = StopLoop.ConditionWithJoiner(
-                        firstCondition = firstCondition,
-                        joiners = StopLoop.Joiners.AND,
-                        secondCondition = secondCondition
+                    useOneCondition.value = StopLoopCondition.ConditionWithJoiner(
+                        firstConditionOperator = StopLoopCondition.Operator.GreaterThan,
+                        joiners = StopLoopCondition.Joiners.AND,
+                        secondConditionOperator = StopLoopCondition.Operator.GreaterThan
                     )
 
                     onEditTask(task.copy(useOneCondition = useOneCondition.value))
@@ -160,13 +147,12 @@ fun StopLoopActionCell(modifier: Modifier = Modifier, task: StopLoop, startLoop:
                         Spacer(modifier = Modifier.width(5.percentOfScreenWidth()))
 
                         CustomSpinner(
-                            selectedItem = task.useOneCondition?.firstCondition?.condition?.value ?: "=",
-                            values = StopLoop.Operator.values().toList()) {
+                            selectedItem = task.useOneCondition?.firstConditionOperator?.value ?: "=",
+                            values = StopLoopCondition.Operator.values().toList()) {
                             try {
                                 onEditTask(task
                                     .copy(useOneCondition = task.useOneCondition
-                                        ?.copy(firstCondition = task.useOneCondition.firstCondition
-                                            .copy(condition = it as StopLoop.Operator))))
+                                        ?.copy(firstConditionOperator = it as StopLoopCondition.Operator)))
                             }catch (_: Exception) { }
                         }
 
@@ -209,11 +195,11 @@ fun StopLoopActionCell(modifier: Modifier = Modifier, task: StopLoop, startLoop:
                         CustomSpinner(
                             modifier = Modifier.width(15.percentOfScreenWidth()),
                             selectedItem = task.useOneCondition?.joiners?.name ?: "AND",
-                            values = StopLoop.Joiners.values().toList()) {
+                            values = StopLoopCondition.Joiners.values().toList()) {
                             try {
                                 onEditTask(task
                                     .copy(useOneCondition = task.useOneCondition
-                                        ?.copy(joiners = it as StopLoop.Joiners)))
+                                        ?.copy(joiners = it as StopLoopCondition.Joiners)))
                             }catch (_: Exception) { }
                         }
 
@@ -257,13 +243,12 @@ fun StopLoopActionCell(modifier: Modifier = Modifier, task: StopLoop, startLoop:
                         Spacer(modifier = Modifier.width(5.percentOfScreenWidth()))
 
                         CustomSpinner(
-                            selectedItem = task.useOneCondition?.secondCondition?.condition?.value ?: "=",
-                            values = StopLoop.Operator.values().toList()) {
+                            selectedItem = task.useOneCondition?.secondConditionOperator?.value ?: "=",
+                            values = StopLoopCondition.Operator.values().toList()) {
                             try {
                                 onEditTask(task
                                     .copy(useOneCondition = task.useOneCondition
-                                        ?.copy(firstCondition = task.useOneCondition.secondCondition
-                                            .copy(condition = it as StopLoop.Operator))))
+                                        ?.copy(secondConditionOperator = it as StopLoopCondition.Operator)))
                             }catch (_: Exception) { }
                         }
 

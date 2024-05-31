@@ -52,6 +52,9 @@ kapt {
 
 dependencies {
 
+    // gson
+    implementation(libs.gson)
+
     // Dagger Hilt
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)

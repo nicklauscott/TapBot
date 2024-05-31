@@ -17,14 +17,14 @@
         android:theme="@style/Theme.TapBot"
         tools:targetApi="31">
 
-        <service android:name="com.example.tapbot.domain.sevices.TapBotForegroundService"
+        <service android:name="com.example.tapbot.ui.sevices.TapBotForegroundService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="specialUse"
             tools:ignore="ForegroundServicePermission" />
 
 
-        <service android:name="com.example.tapbot.domain.sevices.TapBotAccessibilityService"
+        <service android:name="com.example.tapbot.ui.sevices.TapBotAccessibilityService"
             android:exported="true"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>

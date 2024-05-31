@@ -50,7 +50,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.tapbot.domain.usecases.services.ForegroundService
+import com.example.tapbot.ui.sevices.ForegroundService
 import com.example.tapbot.domain.utils.startTapBotForegroundService
 import com.example.tapbot.domain.utils.stopTapBotForegroundService
 import com.example.tapbot.domain.utils.triggerClick
@@ -59,7 +59,6 @@ import com.example.tapbot.ui.screens.home.components.calculateLayoutType
 import com.example.tapbot.ui.screens.info.InfoScreen
 import com.example.tapbot.ui.screens.settings.SettingsScreen
 import com.example.tapbot.ui.screens.tasks.navigation.TasksNavigation
-import com.example.tapbot.ui.screens.tasks.taskslists.TasksScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay

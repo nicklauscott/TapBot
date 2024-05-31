@@ -7,7 +7,7 @@ import android.net.Uri
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import androidx.core.view.accessibility.AccessibilityManagerCompat
-import com.example.tapbot.domain.sevices.TapBotAccessibilityService
+import com.example.tapbot.ui.sevices.TapBotAccessibilityService
 
 
 fun Context.requestAccessibilityPermission() {

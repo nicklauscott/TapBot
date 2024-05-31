@@ -58,20 +58,20 @@ fun ClickActionCell(modifier: Modifier = Modifier, task: ClickTask,
             .padding(horizontal = 1.percentOfScreenWidth()),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             ScreenCoordinates(
-                task = task, range = 0..100,
+                task = task, range = (0..2000).step(20).toList(),
                 onChangeX = { onEditTask(task.copy(x = it.toFloat())) },
                 onChangeY = { onEditTask(task.copy(y = it.toFloat())) },
                 assist = false)
 
-            ClickCell(label = "Clicks", task = task, range = 1..100) {
+            ClickCell(label = "Clicks", task = task, range = (1..1000).toList()) {
                 onEditTask(task.copy(clickCount = it))
             }
 
-            DelayCell(label = "Start Delay", delay = task.delayBeforeTask ?: -1,  delayType = "Ss", range = 1..20) {
+            DelayCell(label = "Start Delay", delay = task.delayBeforeTask ?: -1,  delayType = "Ss", range = (0..100).toList()) {
                 onEditTask(task.copy(delayBeforeTask = it))
             }
 
-            DelayCell(label = "Clicks Delay", delay = task.delayBetweenClicks, delayType = "Ms", range = 1..20) {
+            DelayCell(label = "Clicks Delay", delay = task.delayBetweenClicks, delayType = "Ms", range = (0..10000).step(100).toList()) {
                 onEditTask(task.copy(delayBetweenClicks = it))
             }
 

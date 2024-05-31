@@ -36,6 +36,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.tapbot.R
@@ -56,6 +57,7 @@ import com.example.tapbot.ui.screens.util.cornerRadius
 import com.example.tapbot.ui.screens.util.percentOfScreenHeight
 import com.example.tapbot.ui.screens.util.percentOfScreenWidth
 import com.example.tapbot.ui.screens.util.rectangularModifier
+import com.example.tapbot.ui.sevices.ForegroundService
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -64,6 +66,8 @@ import kotlinx.coroutines.launch
 fun TasksDetailPortrait(
     navController: NavController, viewModel: TaskDetailViewModel, snackBarHostState: SnackbarHostState
 ) {
+
+    val context = LocalContext.current
 
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
@@ -90,6 +94,13 @@ fun TasksDetailPortrait(
                     snackBarHostState.currentSnackbarData?.dismiss()
                     snackBarHostState.showSnackbar("")
                 }
+
+                is TaskDetailViewModel.TaskDetailUiChannel.RunActions -> {
+                    ForegroundService.apply {
+                        context.runTask(it.actions)
+                    }
+                }
+
             }
         }
     }
@@ -132,8 +143,8 @@ fun TasksDetailPortrait(
                 }
             }
         }
-    ) {
-        it.calculateTopPadding()
+    ) { padding ->
+        padding.calculateTopPadding()
 
         if (showBottomSheet.value) {
             ModalBottomSheet(

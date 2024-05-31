@@ -34,7 +34,7 @@ import com.example.tapbot.ui.screens.util.percentOfScreenWidth
 @Composable
 fun ScreenCoordinates(
     modifier: Modifier = Modifier, task: ClickTask,
-    range: IntRange, onChangeX: (Int) -> Unit, onChangeY: (Int) -> Unit, assist: Boolean) {
+    range: List<Int> = (0..2000).step(20).toList(), onChangeX: (Int) -> Unit, onChangeY: (Int) -> Unit, assist: Boolean) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceBetween
@@ -62,7 +62,7 @@ fun ScreenCoordinates(
 }
 
 @Composable
-fun CoordinateCell(symbol: String, selectedItem: String, range: IntRange, assist: Boolean = false, onClick: (Int) -> Unit) {
+fun CoordinateCell(symbol: String, selectedItem: String, range: List<Int>, assist: Boolean = false, onClick: (Int) -> Unit) {
     Row(
         modifier = Modifier.padding(horizontal = 1.percentOfScreenWidth()),
         horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically
@@ -83,7 +83,7 @@ fun CoordinateCell(symbol: String, selectedItem: String, range: IntRange, assist
 
 @Composable
 fun CustomSpinner(
-    selectedItem: String, items: IntRange,
+    selectedItem: String, items: List<Int>,
     assist: Boolean = false,
     onClick: (Int) -> Unit
 ) {
