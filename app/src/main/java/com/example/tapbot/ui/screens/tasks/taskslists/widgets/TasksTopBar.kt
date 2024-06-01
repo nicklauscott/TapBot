@@ -20,6 +20,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +49,8 @@ fun TasksTopBar(
     isSearch: Boolean = true,
     searchText: String,
     onclickSearch: () -> Unit = { },
+    showingFavorite: Boolean = false,
+    onclickFavorite: () -> Unit = { },
     onSearchTextChange: (String) -> Unit = { },
     onDone: () -> Unit = { },
     onCancelSearch: () -> Unit = { }
@@ -82,12 +86,26 @@ fun TasksTopBar(
                     style = MaterialTheme.typography.bodyMedium, fontSize = 28.sp,
                     color = MaterialTheme.colorScheme.onBackground)
 
-                IconButton(onClick = onclickSearch) {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search Icon",
-                        modifier = Modifier.size(30.dp)
-                    )
+
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = onclickFavorite) {
+                        Icon(
+                            imageVector = if (!showingFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = "Search Icon",
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+
+                    IconButton(onClick = onclickSearch) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search Icon",
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+
                 }
 
             }

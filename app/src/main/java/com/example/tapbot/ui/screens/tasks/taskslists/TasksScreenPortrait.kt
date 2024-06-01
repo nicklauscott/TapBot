@@ -36,6 +36,7 @@ fun TaskScreenPortrait(
     viewModel: TaskScreenViewModel, searchText: String, isSearching: Boolean,
     onSearchCleared: () -> Unit, onclickSearch: () -> Unit = { },
     onDone: () -> Unit = { }, onSearchTextChange: (String) -> Unit,
+    onclickFavorite: () -> Unit = { },
     onClickCreateTask: () -> Unit, onTaskClick: (String) -> Unit,
 ) {
 
@@ -51,8 +52,10 @@ fun TaskScreenPortrait(
                     containerColor = MaterialTheme.colorScheme.background
                 )
             ) {
-                TasksTopBar(isSearch = isSearching, onclickSearch = onclickSearch, onDone = onDone,
-                    searchText = searchText, onCancelSearch = onSearchCleared, onSearchTextChange = onSearchTextChange)
+                TasksTopBar(isSearch = isSearching, onclickSearch = onclickSearch,
+                    onDone = onDone, searchText = searchText,
+                    showingFavorite = viewModel.state.value.showingFavorite, onclickFavorite = onclickFavorite,
+                    onCancelSearch = onSearchCleared, onSearchTextChange = onSearchTextChange)
             }
         },
         floatingActionButton = {
@@ -85,7 +88,7 @@ fun TaskScreenPortrait(
             viewModel.state.value.loading -> {
                 Box(modifier = Modifier
                     .fillMaxSize()
-                    .padding(it)) {
+                    .padding(it), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }

@@ -19,7 +19,7 @@ import com.example.tapbot.ui.screens.tasks.taskdetail.components.CustomSpinner
 import com.example.tapbot.ui.screens.util.percentOfScreenWidth
 
 @Composable
-fun DelayCell(label: String, delay: Int, delayType: String, range: List<Int>, onClick: (Int) -> Unit) {
+fun DelayCell(modifier: Modifier = Modifier, label: String, delay: Int, delayType: String, range: List<Int>, onClick: (Int) -> Unit) {
     Column(
         modifier = Modifier.padding(horizontal = 1.percentOfScreenWidth()),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceBetween
@@ -39,15 +39,9 @@ fun DelayCell(label: String, delay: Int, delayType: String, range: List<Int>, on
                 .padding(horizontal = 1.percentOfScreenWidth()),
             horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically
         ) {
-            CustomSpinner(selectedItem = delay.toString(), items = range, assist = false) {
+            CustomSpinner(modifier = modifier, selectedItem = delay.toString(), items = range, assist = false) {
                 onClick(it)
             }
-
-//            CustomSpinner(selectedItem = delay.toString(), items = (1..10000).step(100).toList(),
-//                assist = false, onClick = {
-//                    onClick(it)
-//                }
-//            )
 
             Spacer(modifier = Modifier.width(1.percentOfScreenWidth()))
 
@@ -91,7 +85,7 @@ fun StopLoopValueCell(modifier: Modifier = Modifier, label: String, delay: Int,
 
             CustomSpinner(
                 modifier = modifier,
-                selectedItem = delay.toString(), items = (1..10000).step(100).toList(),
+                selectedItem = delay.toString(), items = items,
                 assist = false, onClick = {
                     onClick(it)
                 }

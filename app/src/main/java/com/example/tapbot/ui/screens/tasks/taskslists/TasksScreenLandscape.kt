@@ -34,7 +34,8 @@ import com.example.tapbot.ui.screens.util.percentOfScreenWidth
 @Composable
 fun TaskScreenLandscape(
     viewModel: TaskScreenViewModel, searchText: String, isSearching: Boolean,
-    onSearchCleared: () -> Unit, onclickSearch: () -> Unit = { },
+    onSearchCleared: () -> Unit, onclickFavorite: () -> Unit = { },
+    onclickSearch: () -> Unit = { },
     onDone: () -> Unit = { }, onSearchTextChange: (String) -> Unit,
     onClickCreateTask: () -> Unit, onTaskClick: (String) -> Unit,
 ) {
@@ -51,6 +52,7 @@ fun TaskScreenLandscape(
             ) {
                 TasksTopBar(modifier = Modifier.height(14.percentOfScreenHeight()),
                     isSearch = isSearching, onclickSearch = onclickSearch, onDone = onDone,
+                    showingFavorite = viewModel.state.value.showingFavorite, onclickFavorite = onclickFavorite,
                     searchText = searchText, onCancelSearch = onSearchCleared, onSearchTextChange = onSearchTextChange)
             }
         },
@@ -82,7 +84,7 @@ fun TaskScreenLandscape(
     ) {
         when  {
             viewModel.state.value.loading -> {
-                Box(modifier = Modifier.fillMaxSize().padding(it)) {
+                Box(modifier = Modifier.fillMaxSize().padding(it), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }

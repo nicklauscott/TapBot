@@ -1,5 +1,6 @@
 package com.example.tapbot.ui.screens.tasks.taskslists
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.tapbot.ui.screens.tasks.navigation.TasksScreens
+import com.example.tapbot.ui.screens.tasks.taskslists.state_and_events.TasksScreenUiEvent
 import com.example.tapbot.ui.screens.util.percentOfScreenWidth
 import com.example.tapbot.ui.screens.util.rectangularModifier
 
@@ -65,45 +67,35 @@ fun TasksScreen(
     ) {
         it.calculateTopPadding()
         when (windowSizeClass.widthSizeClass) {
-            WindowWidthSizeClass.Compact -> TaskScreenPortrait(
-                viewModel, searchText = searchText.value, isSearching = isSearching.value,
-                onSearchCleared = { isSearching.value = false; searchText.value = "" },
-                onclickSearch = { isSearching.value = true },
-                onSearchTextChange = { newText -> searchText.value = newText },
-                onDone = { keyboardController?.hide(); searchText.value = "" },
-                onClickCreateTask = {
-                    navController.navigate(TasksScreens.TaskDetails.withArg())
-                }, onTaskClick = {})
-
-            WindowWidthSizeClass.Medium -> TaskScreenPortrait(
-                viewModel, searchText = searchText.value, isSearching = isSearching.value,
-                onSearchCleared = { isSearching.value = false; searchText.value = "" },
-                onclickSearch = { isSearching.value = true },
-                onSearchTextChange = { newText -> searchText.value = newText },
-                onDone = { keyboardController?.hide(); searchText.value = "" },
-                onClickCreateTask = {
-                    navController.navigate(TasksScreens.TaskDetails.withArg())
-                }, onTaskClick = {})
-
             WindowWidthSizeClass.Expanded -> TaskScreenLandscape(
                 viewModel, searchText = searchText.value, isSearching = isSearching.value,
                 onSearchCleared = { isSearching.value = false; searchText.value = "" },
                 onclickSearch = { isSearching.value = true },
-                onSearchTextChange = { newText -> searchText.value = newText },
+                onSearchTextChange = { newText ->
+                    searchText.value = newText
+                    viewModel.onEvent(TasksScreenUiEvent.SearchTasks(newText))
+                },
+                onclickFavorite = { viewModel.onEvent(TasksScreenUiEvent.GetFavoriteTasks) },
                 onDone = { keyboardController?.hide(); searchText.value = "" },
                 onClickCreateTask = {
                     navController.navigate(TasksScreens.TaskDetails.withArg())
-                }, onTaskClick = {}
+                }, onTaskClick = {taskId ->
+                    navController.navigate(TasksScreens.TaskDetails.withArg(taskId))}
             )
             else -> TaskScreenPortrait(
                 viewModel, searchText = searchText.value, isSearching = isSearching.value,
                 onSearchCleared = { isSearching.value = false; searchText.value = "" },
                 onclickSearch = { isSearching.value = true },
-                onSearchTextChange = { newText -> searchText.value = newText },
+                onSearchTextChange = { newText ->
+                    searchText.value = newText
+                    viewModel.onEvent(TasksScreenUiEvent.SearchTasks(newText))
+                },
+                onclickFavorite = { viewModel.onEvent(TasksScreenUiEvent.GetFavoriteTasks) },
                 onDone = { keyboardController?.hide(); searchText.value = "" },
                 onClickCreateTask = {
                     navController.navigate(TasksScreens.TaskDetails.withArg())
-                }, onTaskClick = {})
+                }, onTaskClick = {taskId ->
+                    navController.navigate(TasksScreens.TaskDetails.withArg(taskId))})
         }
     }
 }

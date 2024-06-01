@@ -18,7 +18,7 @@ import com.example.tapbot.ui.screens.tasks.taskdetail.components.CustomSpinner
 import com.example.tapbot.ui.screens.util.percentOfScreenWidth
 
 @Composable
-fun ClickCell(label: String, task: ClickTask, range: List<Int>, onClick: (Int) -> Unit) {
+fun ClickCell(modifier: Modifier = Modifier, label: String, task: ClickTask, range: List<Int>, onClick: (Int) -> Unit) {
     Column(
         modifier = Modifier.padding(horizontal = 1.percentOfScreenWidth()),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceBetween
@@ -37,7 +37,7 @@ fun ClickCell(label: String, task: ClickTask, range: List<Int>, onClick: (Int) -
                 .padding(horizontal = 1.percentOfScreenWidth()),
             horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically
         ) {
-            CustomSpinner(selectedItem = task.clickCount.toString(), items = range, assist = false) {
+            CustomSpinner(modifier = modifier, selectedItem = task.clickCount.toString(), items = range, assist = false) {
                 onClick(it)
             }
         }

@@ -170,4 +170,9 @@ class TaskManager {
 
     }
 
+    fun pushOldTask(tasks: List<Task>) {
+        this.tasks.clear()
+        this.tasks.addAll(tasks)
+    }
+
 }

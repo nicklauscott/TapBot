@@ -82,3 +82,58 @@ fun ClickActionCell(modifier: Modifier = Modifier, task: ClickTask,
     }
 }
 
+
+@Composable
+fun ClickActionCellLandscape(modifier: Modifier = Modifier, task: ClickTask,
+                    onclickDelete: () -> Unit, onEditTask: (ClickTask) -> Unit) {
+    Column(
+        modifier = Modifier
+            .padding(vertical = 1.percentOfScreenHeight())
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(4.dp))
+            .background(click_action.copy(alpha = 0.2f))
+            .padding(vertical = 2.percentOfScreenHeight())
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.percentOfScreenWidth(), vertical = 1.percentOfScreenHeight()),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+        ) {
+            Text(text = "Click Action", style = MaterialTheme.typography.bodyMedium,
+                maxLines = 2, fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.5f),
+            )
+        }
+
+        Row(modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 1.percentOfScreenWidth()),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+            ScreenCoordinatesLandscape(
+                modifier = modifier,
+                task = task, range = (0..2000).step(20).toList(),
+                onChangeX = { onEditTask(task.copy(x = it.toFloat())) },
+                onChangeY = { onEditTask(task.copy(y = it.toFloat())) },
+                assist = false)
+
+            ClickCell(modifier = modifier, label = "Clicks", task = task, range = (1..1000).toList()) {
+                onEditTask(task.copy(clickCount = it))
+            }
+
+            DelayCell(modifier = modifier, label = "Start Delay", delay = task.delayBeforeTask ?: -1,  delayType = "Ss", range = (0..100).toList()) {
+                onEditTask(task.copy(delayBeforeTask = it))
+            }
+
+            DelayCell(modifier = modifier, label = "Clicks Delay", delay = task.delayBetweenClicks, delayType = "Ms", range = (0..10000).step(100).toList()) {
+                onEditTask(task.copy(delayBetweenClicks = it))
+            }
+
+            IconButton(onClick = { onclickDelete() }) {
+                Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete icon")
+            }
+        }
+    }
+}

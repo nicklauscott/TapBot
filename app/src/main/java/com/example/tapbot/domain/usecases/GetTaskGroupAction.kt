@@ -18,12 +18,14 @@ class GetTaskGroupAction @Inject constructor(
         return flow {
             repository.getTasksGroupById(tasksGroupId).collect { tasksGroup ->
                 val tasks = mutableListOf<Task>()
+                val taskMap = mutableMapOf<Int, Task>()
                 tasksGroup.tasks.forEach { task ->
-                    if (task is ClickTask) tasks.add(task.taskNumberInTheList, task)
-                    if (task is DelayTask) tasks.add(task.taskNumberInTheList, task)
-                    if (task is StartLoop) tasks.add(task.taskNumberInTheList, task)
-                    if (task is StopLoop) tasks.add(task.taskNumberInTheList, task)
+                    if (task is ClickTask) taskMap[task.taskNumberInTheList] = task
+                    if (task is DelayTask) taskMap[task.taskNumberInTheList] = task
+                    if (task is StartLoop) taskMap[task.taskNumberInTheList] = task
+                    if (task is StopLoop) taskMap[task.taskNumberInTheList] = task
                 }
+                taskMap.entries.sortedBy { it.key }.forEach { tasks.add(it.value) }
                 emit(TaskGroupList(taskGroup = tasksGroup.taskGroup, tasks = tasks))
             }
         }

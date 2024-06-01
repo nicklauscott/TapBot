@@ -38,14 +38,16 @@ import com.example.tapbot.ui.theme.startLoop_action
 import com.example.tapbot.ui.theme.stopLoop_action
 
 @Composable
-fun StopLoopActionCell(modifier: Modifier = Modifier, task: StopLoop, startLoop: StartLoop? = null,
-                       onEditTask: (StopLoop) -> Unit, onclickDelete: () -> Unit) {
+fun StopLoopActionCell(
+    modifier: Modifier = Modifier, task: StopLoop, startLoop: StartLoop? = null,
+    onEditTask: (StopLoop) -> Unit, onclickDelete: () -> Unit
+) {
 
     val expanded = remember { mutableStateOf(false) }
     val useOneCondition = remember { mutableStateOf(task.useOneCondition) }
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .padding(top = 0.4.percentOfScreenHeight())
             .fillMaxWidth()
             .clip(RoundedCornerShape(4.dp))
@@ -56,20 +58,21 @@ fun StopLoopActionCell(modifier: Modifier = Modifier, task: StopLoop, startLoop:
 
 
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 4.percentOfScreenWidth()),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.End
         ) {
-            Text(text = "Stop Loop Action", style = MaterialTheme.typography.bodyMedium,
+            Text(
+                text = "Stop Loop Action", style = MaterialTheme.typography.bodyMedium,
                 maxLines = 2, fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.5f),
             )
         }
 
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 1.percentOfScreenWidth())
                 .padding(bottom = 1.percentOfScreenHeight()),
@@ -80,7 +83,8 @@ fun StopLoopActionCell(modifier: Modifier = Modifier, task: StopLoop, startLoop:
             StopLoopValueCell(
                 modifier = modifier.width(15.percentOfScreenWidth()),
                 label = "Stop if time", delay = task.time, delayType = "Ss",
-                items = (0..1000).step(100).toList()) {
+                items = (0..1000).step(100).toList()
+            ) {
                 onEditTask(task.copy(time = it))
             }
             StopLoopValueCell(
@@ -99,14 +103,15 @@ fun StopLoopActionCell(modifier: Modifier = Modifier, task: StopLoop, startLoop:
 
         AnimatedVisibility(visible = expanded.value) {
             Column(
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .background(startLoop_action.copy(alpha = 0.4f))
                     .padding(
                         horizontal = 1.percentOfScreenWidth(),
                         vertical = 1.5.percentOfScreenHeight()
                     ),
-                verticalArrangement = Arrangement.spacedBy(1.percentOfScreenHeight())) {
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
 
                 if (task.useOneCondition == null) {
                     useOneCondition.value = StopLoopCondition.ConditionWithJoiner(
@@ -118,58 +123,25 @@ fun StopLoopActionCell(modifier: Modifier = Modifier, task: StopLoop, startLoop:
                     onEditTask(task.copy(useOneCondition = useOneCondition.value))
                 }
 
-                Row(
-                    Modifier.padding(horizontal = 1.percentOfScreenWidth()),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                ComparingCell(
+                    modifier = modifier,
+                    label = "Set time condition",
+                    description = "keep time",
+                    disabledMessage = "Enable time condition first",
+                    enable = startLoop?.enableTimeCondition ?: false,
+                    value = task.time.toString(),
+                    onValueChange = { onEditTask(task.copy(time = it)) },
+                    operatorSymbol = task.useOneCondition?.firstConditionOperator?.value ?: "="
                 ) {
-
-
-                    Text(text = "Set time condition", style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 2, fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                    )
-
-
-                    Spacer(modifier = Modifier.width(10.percentOfScreenWidth()))
-
-                    if (startLoop?.enableTimeCondition == true) {
-                        CustomSpinner(
-                            modifier = Modifier.width(15.percentOfScreenWidth()),
-                            selectedItem = task.time.toString(),
-                            items = (1..10000).step(100).toList(),
-                            assist = false,
-                            onClick = {
-                                onEditTask(task.copy(time = it))
-                            }
+                    try {
+                        onEditTask(
+                            task
+                                .copy(
+                                    useOneCondition = task.useOneCondition
+                                        ?.copy(firstConditionOperator = it as StopLoopCondition.Operator)
+                                )
                         )
-
-                        Spacer(modifier = Modifier.width(5.percentOfScreenWidth()))
-
-                        CustomSpinner(
-                            selectedItem = task.useOneCondition?.firstConditionOperator?.value ?: "=",
-                            values = StopLoopCondition.Operator.values().toList()) {
-                            try {
-                                onEditTask(task
-                                    .copy(useOneCondition = task.useOneCondition
-                                        ?.copy(firstConditionOperator = it as StopLoopCondition.Operator)))
-                            }catch (_: Exception) { }
-                        }
-
-                        Spacer(modifier = Modifier.width(5.percentOfScreenWidth()))
-
-                        Text(text = "keep time", style = MaterialTheme.typography.bodySmall,
-                            maxLines = 2, fontSize = 13.sp,
-                            color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.5f),
-                        )
-                    }
-
-
-                    if (startLoop?.enableTimeCondition == false) {
-                        Text(text = "Enable time condition first", style = MaterialTheme.typography.bodySmall,
-                            maxLines = 2, fontSize = 13.sp,
-                            color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.5f),
-                        )
+                    } catch (_: Exception) {
                     }
                 }
 
@@ -179,93 +151,63 @@ fun StopLoopActionCell(modifier: Modifier = Modifier, task: StopLoop, startLoop:
                     Spacer(modifier = Modifier.height(1.percentOfScreenHeight()))
 
                     Row(
-                        Modifier.padding(horizontal = 1.percentOfScreenWidth()),
+                        Modifier.padding(horizontal = 1.5.percentOfScreenWidth()),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
 
-                        Text(text = "Set gate condition", style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 2, fontSize = 13.sp,
+                        Text(
+                            text = "Set gate condition",
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 2,
+                            fontSize = 13.sp,
                             color = MaterialTheme.colorScheme.inverseOnSurface,
                         )
 
 
-                        Spacer(modifier = Modifier.width(10.percentOfScreenWidth()))
+                        Spacer(modifier = Modifier.width(20.percentOfScreenWidth()))
 
                         CustomSpinner(
-                            modifier = Modifier.width(15.percentOfScreenWidth()),
+                            modifier = modifier.width(15.percentOfScreenWidth()),
                             selectedItem = task.useOneCondition?.joiners?.name ?: "AND",
-                            values = StopLoopCondition.Joiners.values().toList()) {
+                            values = StopLoopCondition.Joiners.values().toList()
+                        ) {
                             try {
-                                onEditTask(task
-                                    .copy(useOneCondition = task.useOneCondition
-                                        ?.copy(joiners = it as StopLoopCondition.Joiners)))
-                            }catch (_: Exception) { }
+                                onEditTask(
+                                    task
+                                        .copy(
+                                            useOneCondition = task.useOneCondition
+                                                ?.copy(joiners = it as StopLoopCondition.Joiners)
+                                        )
+                                )
+                            } catch (_: Exception) {
+                            }
                         }
-
-                        Spacer(modifier = Modifier.width(5.percentOfScreenWidth()))
-
-                        Text(text = "keep count", style = MaterialTheme.typography.bodySmall,
-                            maxLines = 2, fontSize = 13.sp,
-                            color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.5f),
-                        )
 
                     }
                 }
 
                 Spacer(modifier = Modifier.height(1.percentOfScreenHeight()))
 
-                Row(
-                    Modifier.padding(horizontal = 1.percentOfScreenWidth()),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                ComparingCell(
+                    modifier = modifier,
+                    label = "Set count condition",
+                    description = "keep count",
+                    disabledMessage = "Enable count condition first",
+                    enable = startLoop?.enableTimeCondition ?: false,
+                    value = task.count.toString(),
+                    onValueChange = { onEditTask(task.copy(time = it)) },
+                    operatorSymbol = task.useOneCondition?.secondConditionOperator?.value ?: "="
                 ) {
-
-                    Text(text = "Set count condition", style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 2, fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.inverseOnSurface,
-                    )
-
-
-                    Spacer(modifier = Modifier.width(10.percentOfScreenWidth()))
-
-                    if (startLoop?.enableCountCondition == true) {
-                        CustomSpinner(
-                            modifier = Modifier.width(20.percentOfScreenWidth()),
-                            selectedItem = task.time.toString(),
-                            items = (1..10000).step(100).toList(),
-                            assist = false,
-                            onClick = {
-                                onEditTask(task.copy(count = it))
-                            }
+                    try {
+                        onEditTask(
+                            task
+                                .copy(
+                                    useOneCondition = task.useOneCondition
+                                        ?.copy(secondConditionOperator = it as StopLoopCondition.Operator)
+                                )
                         )
-
-                        Spacer(modifier = Modifier.width(5.percentOfScreenWidth()))
-
-                        CustomSpinner(
-                            selectedItem = task.useOneCondition?.secondConditionOperator?.value ?: "=",
-                            values = StopLoopCondition.Operator.values().toList()) {
-                            try {
-                                onEditTask(task
-                                    .copy(useOneCondition = task.useOneCondition
-                                        ?.copy(secondConditionOperator = it as StopLoopCondition.Operator)))
-                            }catch (_: Exception) { }
-                        }
-
-                        Spacer(modifier = Modifier.width(5.percentOfScreenWidth()))
-
-                        Text(text = "keep count", style = MaterialTheme.typography.bodySmall,
-                            maxLines = 2, fontSize = 13.sp,
-                            color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.5f),
-                        )
-                    }
-
-
-                    if (startLoop?.enableCountCondition == false) {
-                        Text(text = "Enable count condition first", style = MaterialTheme.typography.bodySmall,
-                            maxLines = 2, fontSize = 13.sp,
-                            color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.5f),
-                        )
+                    } catch (_: Exception) {
                     }
                 }
 
@@ -273,15 +215,79 @@ fun StopLoopActionCell(modifier: Modifier = Modifier, task: StopLoop, startLoop:
         }
 
         Row(
-            modifier = modifier.fillMaxWidth()
+            modifier = modifier
+                .fillMaxWidth()
                 .clickable { expanded.value = !expanded.value },
             horizontalArrangement = Arrangement.Center,
         ) {
 
-            Icon(imageVector = if (expanded.value) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+            Icon(
+                imageVector = if (expanded.value) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                 contentDescription = "Show or hide icon",
-                tint = MaterialTheme.colorScheme.inverseOnSurface)
+                tint = MaterialTheme.colorScheme.inverseOnSurface
+            )
         }
     }
 }
 
+@Composable
+fun ComparingCell(
+    modifier: Modifier = Modifier, label: String,
+    description: String, disabledMessage: String,
+    enable: Boolean, value: String, onValueChange: (Int) -> Unit,
+    operatorSymbol: String, onOperatorChange: (Any) -> Unit
+) {
+    Row(
+        Modifier.padding(horizontal = 1.percentOfScreenWidth()),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+
+
+        Text(
+            text = label, style = MaterialTheme.typography.bodyMedium,
+            maxLines = 2, fontSize = 13.sp,
+            color = MaterialTheme.colorScheme.inverseOnSurface,
+        )
+
+
+        Spacer(modifier = Modifier.width(10.percentOfScreenWidth()))
+
+        if (enable) {
+            CustomSpinner(
+                modifier = modifier.width(15.percentOfScreenWidth()),
+                selectedItem = value,
+                items = (1..10000).step(100).toList(),
+                assist = false,
+                onClick = onValueChange
+            )
+
+            Spacer(modifier = Modifier.width(5.percentOfScreenWidth()))
+
+            CustomSpinner(
+                modifier = modifier,
+                selectedItem = operatorSymbol,
+                values = StopLoopCondition.Operator.values().toList()
+            ) {
+                onOperatorChange(it)
+            }
+
+            Spacer(modifier = Modifier.width(5.percentOfScreenWidth()))
+
+            Text(
+                text = description, style = MaterialTheme.typography.bodySmall,
+                maxLines = 2, fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.5f),
+            )
+        }
+
+
+        if (!enable) {
+            Text(
+                text = disabledMessage, style = MaterialTheme.typography.bodySmall,
+                maxLines = 2, fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.5f),
+            )
+        }
+    }
+}

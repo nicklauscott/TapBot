@@ -13,7 +13,7 @@ data class TaskDetailScreenState(
     private var oldTaskGroup: TaskGroup? = null
     private var oldTaskList: List<Task> = emptyList()
 
-    fun update(taskGroup: TaskGroup?, taskList: List<Task>) {
+    fun update(taskGroup: TaskGroup? = null, taskList: List<Task>) {
        oldTaskGroup = taskGroup
        oldTaskList = taskList
 

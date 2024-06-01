@@ -33,16 +33,15 @@ import com.example.tapbot.ui.theme.startLoop_action
 fun StartLoopActionCell(modifier: Modifier = Modifier, task: StartLoop, onEditTask: (StartLoop) -> Unit,
                         onclickDelete: () -> Unit) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .padding(vertical = 0.4.percentOfScreenHeight())
             .fillMaxWidth()
-            .height(10.percentOfScreenHeight())
             .clip(RoundedCornerShape(4.dp))
             .background(startLoop_action.copy(alpha = 0.2f))
             .padding(vertical = 1.percentOfScreenHeight()),
     ) {
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 4.percentOfScreenWidth()),
             verticalAlignment = Alignment.CenterVertically,
@@ -55,17 +54,17 @@ fun StartLoopActionCell(modifier: Modifier = Modifier, task: StartLoop, onEditTa
         }
 
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 1.percentOfScreenWidth()),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            YesNoCell(label = "Keep Time", delay = task.time, extraInfo = "Ms") {
+            YesNoCell(modifier = modifier, label = "Keep Time", delay = task.time, extraInfo = "Ms") {
                 onEditTask(task.copy(time = it))
             }
-            YesNoCell(label = "Keep Count", delay = task.count, extraInfo = null) {
+            YesNoCell(modifier = modifier, label = "Keep Count", delay = task.count, extraInfo = null) {
                 onEditTask(task.copy(count = it))
             }
 
@@ -78,7 +77,7 @@ fun StartLoopActionCell(modifier: Modifier = Modifier, task: StartLoop, onEditTa
 
 
 @Composable
-fun YesNoCell(label: String, delay: Int, extraInfo: String?, onClick: (Int) -> Unit) {
+fun YesNoCell(modifier: Modifier = Modifier, label: String, delay: Int, extraInfo: String?, onClick: (Int) -> Unit) {
     Column(
         modifier = Modifier.padding(horizontal = 1.percentOfScreenWidth()),
         horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.SpaceBetween
@@ -98,7 +97,7 @@ fun YesNoCell(label: String, delay: Int, extraInfo: String?, onClick: (Int) -> U
                 .padding(horizontal = 1.percentOfScreenWidth()),
             horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically
         ) {
-            CustomYesNoSpinner(selectedItem = delay) {
+            CustomYesNoSpinner(modifier = modifier, selectedItem = delay) {
                 onClick(it)
             }
 

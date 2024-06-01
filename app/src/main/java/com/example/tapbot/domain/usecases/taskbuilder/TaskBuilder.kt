@@ -1,18 +1,45 @@
 package com.example.tapbot.domain.usecases.taskbuilder
 
+import android.util.Log
 import com.example.tapbot.domain.model.ClickTask
 import com.example.tapbot.domain.model.DelayTask
 import com.example.tapbot.domain.model.StartLoop
 import com.example.tapbot.domain.model.StopLoop
 import com.example.tapbot.domain.model.Task
+import com.example.tapbot.domain.model.TaskGroup
 import java.util.UUID
 
-class TaskBuilder {
-    private lateinit var taskManager: TaskManager
+class TaskBuilder(taskGroup: TaskGroup?) {
+    private var taskManager: TaskManager
     private var tasGroupId: String = ""
 
     private var startLoopCount: Int = 0
     private var lastTask: Task? = null
+
+    init {
+        if (taskGroup == null) {
+            taskManager = TaskManager()
+            tasGroupId = UUID.randomUUID().toString()
+        }else {
+            taskManager = TaskManager()
+            tasGroupId = taskGroup.taskGroupId
+        }
+    }
+
+    fun getTaskGroup(): TaskGroup {
+        val taskGroup = TaskGroup(taskGroupId = tasGroupId)
+        Log.d("TaskDetailViewModel", tasGroupId)
+        return taskGroup
+    }
+
+    fun pushOldTask(tasks: List<Task>) {
+        taskManager.pushOldTask(tasks)
+    }
+
+
+    fun builder(): TaskBuilder {
+        return this
+    }
 
     fun deleteTask(index: Int) {
         if (taskManager.getTasks()[index] is StopLoop) lastTask = null
@@ -25,12 +52,6 @@ class TaskBuilder {
 
     fun editTask(index: Int, task: Task) {
         taskManager.editTask(index, task)
-    }
-
-    fun builder(): TaskBuilder {
-        taskManager = TaskManager()
-        tasGroupId = UUID.randomUUID().toString()
-        return this
     }
 
     fun build(): List<Task> {
@@ -74,7 +95,7 @@ class TaskBuilder {
 
 
 fun main() {
-    val tasks = TaskBuilder().builder()
+    val tasks = TaskBuilder(null).builder()
         .click().click().delay()
         .loop().click().delay().stopLoop()
         .loop().click().delay().stopLoop()

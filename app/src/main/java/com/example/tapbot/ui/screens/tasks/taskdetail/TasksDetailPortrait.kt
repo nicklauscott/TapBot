@@ -3,6 +3,7 @@ package com.example.tapbot.ui.screens.tasks.taskdetail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,9 +14,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
@@ -26,6 +31,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,9 +42,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.tapbot.R
 import com.example.tapbot.domain.model.Actions
@@ -50,7 +65,9 @@ import com.example.tapbot.ui.screens.tasks.taskdetail.components.DelayActionCell
 import com.example.tapbot.ui.screens.tasks.taskdetail.components.StartLoopActionCell
 import com.example.tapbot.ui.screens.tasks.taskdetail.components.StopLoopActionCell
 import com.example.tapbot.ui.screens.tasks.taskdetail.state_and_events.TaskDetailScreenUiEvent
-import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.ActionCell
+import com.example.tapbot.ui.screens.tasks.taskdetail.components.ActionCell
+import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.CompleteDetailDialog
+import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.DeleteDialog
 import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.Fab
 import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.TasksDetailTopBar
 import com.example.tapbot.ui.screens.util.cornerRadius
@@ -78,6 +95,26 @@ fun TasksDetailPortrait(
 
     val tasks by viewModel.state
 
+    val showCompleteDialog = remember { mutableStateOf(false) }
+    val showDeleteDialog = remember { mutableStateOf(false) }
+
+    if (showCompleteDialog.value) {
+        CompleteDetailDialog(onDismissRequest = {
+            showCompleteDialog.value = false
+        }) { name, description ->
+            showCompleteDialog.value = false
+            viewModel.onEvent(TaskDetailScreenUiEvent.CompleteTask(name = name, description = description))
+        }
+    }
+
+    if (showDeleteDialog.value) {
+        DeleteDialog( onDismissRequest = { showDeleteDialog.value = false }) {
+            showDeleteDialog.value = false
+            viewModel.onEvent(TaskDetailScreenUiEvent.DeleteTask)
+        }
+    }
+
+
     LaunchedEffect(viewModel) {
         viewModel.channel.collectLatest {
             when (it) {
@@ -100,7 +137,8 @@ fun TasksDetailPortrait(
                         context.runTask(it.actions)
                     }
                 }
-
+                TaskDetailViewModel.TaskDetailUiChannel.CompleteTaskDetail -> showCompleteDialog.value = true
+                TaskDetailViewModel.TaskDetailUiChannel.DeletedTask -> navController.popBackStack()
             }
         }
     }
@@ -111,9 +149,11 @@ fun TasksDetailPortrait(
             TasksDetailTopBar(
                 title = tasks.taskGroup?.name ?: "Loading...",
                 canPlay = tasks.taskGroup != null && tasks.taskList.isNotEmpty(),
-                canSave = tasks.canSave(),
+                canSave = tasks.canSave(), favorite = tasks.taskGroup?.favorite ?: false,
+                onToggleFavorite = { viewModel.onEvent(TaskDetailScreenUiEvent.ToggleFavorite) },
                 onClickSave = { viewModel.onEvent(TaskDetailScreenUiEvent.SaveTask) },
-                onClickPlay = { viewModel.onEvent(TaskDetailScreenUiEvent.PlayTask) }
+                onClickPlay = { viewModel.onEvent(TaskDetailScreenUiEvent.PlayTask) },
+                onClickDelete = { showDeleteDialog.value = true },
             ) {
                 navController.popBackStack()
             }
@@ -125,8 +165,7 @@ fun TasksDetailPortrait(
         },
         floatingActionButtonPosition = FabPosition.End,
         snackbarHost = {
-            SnackbarHost(hostState = snackBarHostState)
-            {
+            SnackbarHost(hostState = snackBarHostState) {
                 Row(
                     modifier = rectangularModifier(
                         background = if (isError.value) MaterialTheme.colorScheme.error
@@ -246,7 +285,8 @@ fun TasksDetailPortrait(
                     }
 
                     if (tasks.saving) {
-                        Box(modifier = Modifier.fillMaxSize()
+                        Box(modifier = Modifier
+                            .fillMaxSize()
                             .background(MaterialTheme.colorScheme.background.copy(alpha = 0.5f)),
                             contentAlignment = Alignment.Center
                         ) {
@@ -259,9 +299,3 @@ fun TasksDetailPortrait(
         }
     }
 }
-
-
-
-
-
-

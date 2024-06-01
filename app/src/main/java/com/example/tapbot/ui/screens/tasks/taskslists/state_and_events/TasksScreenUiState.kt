@@ -4,5 +4,6 @@ import com.example.tapbot.domain.model.TaskGroup
 
 data class TasksScreenUiState(
     val loading: Boolean = false,
-    val tasks: List<TaskGroup> = emptyList()
+    val tasks: List<TaskGroup> = emptyList(),
+    val showingFavorite: Boolean = false
 )

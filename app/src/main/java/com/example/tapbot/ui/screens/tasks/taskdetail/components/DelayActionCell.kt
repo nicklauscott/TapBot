@@ -31,17 +31,16 @@ import com.example.tapbot.ui.theme.delay_action
 fun DelayActionCell(modifier: Modifier = Modifier, task: DelayTask, onEditTask: (DelayTask) -> Unit,
                     onclickDelete: () -> Unit) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .padding(vertical = 0.4.percentOfScreenHeight())
             .fillMaxWidth()
-            .height(10.percentOfScreenHeight())
             .clip(RoundedCornerShape(4.dp))
             .background(delay_action.copy(alpha = 0.2f))
             .padding(vertical = 1.percentOfScreenHeight())
     ) {
 
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 4.percentOfScreenWidth()),
             verticalAlignment = Alignment.CenterVertically,
@@ -54,21 +53,21 @@ fun DelayActionCell(modifier: Modifier = Modifier, task: DelayTask, onEditTask: 
         }
 
         Row(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 1.percentOfScreenWidth()),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
 
-            DelayCell(label = "Hours", delay = task.delayHour, delayType = "Hr", range =(0..24).toList()) {
+            DelayCell(modifier = modifier, label = "Hours", delay = task.delayHour, delayType = "Hr", range =(0..24).toList()) {
                 onEditTask(task.copy(delayHour = it))
             }
-            DelayCell(label = "Minutes", delay = task.delayMinute, delayType = "Min", range = (0..59).toList()
+            DelayCell(modifier = modifier, label = "Minutes", delay = task.delayMinute, delayType = "Min", range = (0..59).toList()
             ) {
                 onEditTask(task.copy(delayMinute = it))
             }
-            DelayCell(label = "Seconds", delay = task.delaySecond, delayType = "Sec", range = (1..100).toList()
+            DelayCell(modifier = modifier, label = "Seconds", delay = task.delaySecond, delayType = "Sec", range = (1..100).toList()
             ) {
                 onEditTask(task.copy(delaySecond = it))
             }

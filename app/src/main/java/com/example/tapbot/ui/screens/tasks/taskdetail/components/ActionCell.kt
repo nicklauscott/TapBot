@@ -1,4 +1,4 @@
-package com.example.tapbot.ui.screens.tasks.taskdetail.widgets
+package com.example.tapbot.ui.screens.tasks.taskdetail.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
