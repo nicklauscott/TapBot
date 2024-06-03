@@ -61,7 +61,7 @@ fun CompleteDetailDialog(modifier: Modifier = Modifier, isPortrait: Boolean = tr
     val name = remember { mutableStateOf("") }
     val description = remember { mutableStateOf("") }
 
-    if (WindowInsets.isImeVisible) isKeyboardVisible.value = true else isKeyboardVisible.value = false
+    isKeyboardVisible.value = WindowInsets.isImeVisible
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()

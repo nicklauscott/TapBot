@@ -73,4 +73,16 @@ interface TaskDao {
     @Query("DELETE FROM taskgroup WHERE taskGroupId = :taskGroupId")
     suspend fun deleteTaskGroupWithId(taskGroupId: String)
 
+
+    @Query("DELETE FROM clicktask WHERE id = :id")
+    suspend fun deleteClickTaskById(id: String)
+
+    @Query("DELETE FROM delaytask WHERE id = :id")
+    suspend fun deleteDelayTaskById(id: String)
+
+    @Query("DELETE FROM startloop WHERE id = :id")
+    suspend fun deleteStartLoopTaskById(id: String)
+
+    @Query("DELETE FROM stoploop WHERE id = :id")
+    suspend fun deleteStopLoopTaskById(id: String)
 }

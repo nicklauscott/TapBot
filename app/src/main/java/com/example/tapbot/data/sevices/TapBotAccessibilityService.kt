@@ -1,6 +1,7 @@
-package com.example.tapbot.ui.sevices
+package com.example.tapbot.data.sevices
 
 import android.accessibilityservice.AccessibilityService
+import android.accessibilityservice.AccessibilityServiceInfo
 import android.accessibilityservice.GestureDescription
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -18,14 +19,20 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.example.tapbot.ui.screens.home.OverlayTapBot
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class TapBotAccessibilityService: AccessibilityService() {
 
     private var composeView: ComposeView? = null
     private lateinit var windowManager: WindowManager
+
+    companion object {
+        var instance: TapBotAccessibilityService? = null
+    }
 
     private val actionReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -33,6 +40,7 @@ class TapBotAccessibilityService: AccessibilityService() {
             val y = intent?.getFloatExtra("y", 0f)
             if ((x != null && x != -1f) && (y != null && y != -1f)) {
                 removeOverlay()
+                Log.d("TaskDetailViewModel", "2")
                 performClick(x, y)
             }
         }
@@ -50,9 +58,17 @@ class TapBotAccessibilityService: AccessibilityService() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onServiceConnected() {
         super.onServiceConnected()
+
+        val info = AccessibilityServiceInfo()
+        info.apply {
+            eventTypes = START_STICKY
+        }
+
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        instance = this
 
         val actionIntent = IntentFilter("com.example.tapbot.PERFORM_CLICK")
+        Log.d("TaskDetailViewModel", "1: $actionIntent")
         registerReceiver(actionReceiver, actionIntent, RECEIVER_NOT_EXPORTED)
 
         val loadConfigIntent = IntentFilter("com.example.tapbot.LOAD.CONFIG")
@@ -107,6 +123,7 @@ class TapBotAccessibilityService: AccessibilityService() {
     }
 
     fun performClick(x: Float, y: Float) {
+        Log.d("TaskDetailViewModel", "3x")
         val path = Path()
         path.moveTo(x, y)
 
@@ -117,15 +134,16 @@ class TapBotAccessibilityService: AccessibilityService() {
         val gesture = gestureBuilder.build()
 
         CoroutineScope(Dispatchers.Main).launch {
+            Log.d("TaskDetailViewModel", "3")
             dispatchGesture(gesture, object : GestureResultCallback() {
                 override fun onCompleted(gestureDescription: GestureDescription?) {
                     super.onCompleted(gestureDescription)
-                    Log.d("MyAccessibilityService", "Gesture completed.")
+                    Log.d("TaskDetailViewModel", "Gesture completed.")
                 }
 
                 override fun onCancelled(gestureDescription: GestureDescription?) {
                     super.onCancelled(gestureDescription)
-                    Log.d("MyAccessibilityService", "Gesture cancelled.")
+                    Log.d("TaskDetailViewModel", "Gesture cancelled.")
                 }
             }, null)
         }

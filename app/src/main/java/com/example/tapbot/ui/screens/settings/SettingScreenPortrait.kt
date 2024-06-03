@@ -20,7 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.example.tapbot.R
-import com.example.tapbot.ui.sevices.ForegroundService
+import com.example.tapbot.data.sevices.ForegroundService
+import com.example.tapbot.data.sevices.TapBotForegroundService
 import com.example.tapbot.ui.screens.settings.state_and_events.SettingScreenUiEvent
 import com.example.tapbot.ui.screens.settings.widgets.EnableMainFeature
 import com.example.tapbot.ui.screens.settings.widgets.SettingCell
@@ -35,7 +36,7 @@ fun SettingScreenPortrait(viewModel: SettingsViewModel) {
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK || Settings.canDrawOverlays(context)) {
-            ForegroundService.startService(context).also {
+            ForegroundService.startService<TapBotForegroundService>(context).also {
                 viewModel.onEvent(SettingScreenUiEvent.LoadServiceStatus(it))
             }
         }else{
@@ -45,7 +46,7 @@ fun SettingScreenPortrait(viewModel: SettingsViewModel) {
 
 
     LaunchedEffect(viewModel) {
-        ForegroundService.checkServiceRunning(context).also {
+        ForegroundService.checkServiceRunning<TapBotForegroundService>(context).also {
             viewModel.onEvent(SettingScreenUiEvent.LoadServiceStatus(it))
         }
     }
@@ -78,13 +79,13 @@ fun SettingScreenPortrait(viewModel: SettingsViewModel) {
             }
 
             if (viewModel.state.value.isServiceRunning) {
-                ForegroundService.stopService(context).also {
+                ForegroundService.stopService<TapBotForegroundService>(context).also {
                     if (it) viewModel.onEvent(SettingScreenUiEvent.StopService)
                 }
                 return@EnableMainFeature
             }
 
-            ForegroundService.startService(context).also {
+            ForegroundService.startService<TapBotForegroundService>(context).also {
                 if (it) viewModel.onEvent(SettingScreenUiEvent.StartService)
             }
         }

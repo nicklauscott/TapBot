@@ -141,8 +141,7 @@ fun StopLoopActionCell(
                                         ?.copy(firstConditionOperator = it as StopLoopCondition.Operator)
                                 )
                         )
-                    } catch (_: Exception) {
-                    }
+                    } catch (_: Exception) { }
                 }
 
 
@@ -194,9 +193,9 @@ fun StopLoopActionCell(
                     label = "Set count condition",
                     description = "keep count",
                     disabledMessage = "Enable count condition first",
-                    enable = startLoop?.enableTimeCondition ?: false,
+                    enable = startLoop?.enableCountCondition ?: false,
                     value = task.count.toString(),
-                    onValueChange = { onEditTask(task.copy(time = it)) },
+                    onValueChange = { onEditTask(task.copy(count = it)) },
                     operatorSymbol = task.useOneCondition?.secondConditionOperator?.value ?: "="
                 ) {
                     try {
@@ -207,8 +206,7 @@ fun StopLoopActionCell(
                                         ?.copy(secondConditionOperator = it as StopLoopCondition.Operator)
                                 )
                         )
-                    } catch (_: Exception) {
-                    }
+                    } catch (_: Exception) { }
                 }
 
             }

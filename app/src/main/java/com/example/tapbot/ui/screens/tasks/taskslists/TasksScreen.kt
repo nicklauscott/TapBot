@@ -69,7 +69,10 @@ fun TasksScreen(
         when (windowSizeClass.widthSizeClass) {
             WindowWidthSizeClass.Expanded -> TaskScreenLandscape(
                 viewModel, searchText = searchText.value, isSearching = isSearching.value,
-                onSearchCleared = { isSearching.value = false; searchText.value = "" },
+                onSearchCleared = {
+                    isSearching.value = false; searchText.value = ""
+                    viewModel.onEvent(TasksScreenUiEvent.ClearSearch)
+                },
                 onclickSearch = { isSearching.value = true },
                 onSearchTextChange = { newText ->
                     searchText.value = newText
@@ -84,7 +87,10 @@ fun TasksScreen(
             )
             else -> TaskScreenPortrait(
                 viewModel, searchText = searchText.value, isSearching = isSearching.value,
-                onSearchCleared = { isSearching.value = false; searchText.value = "" },
+                onSearchCleared = {
+                    isSearching.value = false; searchText.value = ""
+                    viewModel.onEvent(TasksScreenUiEvent.ClearSearch)
+                },
                 onclickSearch = { isSearching.value = true },
                 onSearchTextChange = { newText ->
                     searchText.value = newText

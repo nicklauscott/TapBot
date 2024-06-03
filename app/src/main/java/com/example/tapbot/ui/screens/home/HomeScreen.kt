@@ -50,7 +50,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.tapbot.ui.sevices.ForegroundService
+import com.example.tapbot.data.sevices.ForegroundService
+import com.example.tapbot.data.sevices.TapBotForegroundService
 import com.example.tapbot.domain.utils.startTapBotForegroundService
 import com.example.tapbot.domain.utils.stopTapBotForegroundService
 import com.example.tapbot.domain.utils.triggerClick
@@ -77,7 +78,7 @@ fun HomeScreen(windowSizeClass: WindowSizeClass, navController: NavController) {
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK || Settings.canDrawOverlays(context)) {
-            ForegroundService.startService(context)
+            ForegroundService.startService<TapBotForegroundService>(context)
         }
     }
 
@@ -244,20 +245,19 @@ fun OverlayTapBot(modifier: Modifier = Modifier) {
     Column(
         modifier = Modifier
             .height(100.dp)
-            .width(400.dp)
+            .width(100.dp)
             .background(MaterialTheme.colorScheme.background.copy(alpha = 0.4f))
             .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.End,
     ) {
         Text(text = "Overlay", fontSize = 18.sp, color = MaterialTheme.colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = {
-            Log.d("SplashScreenViewModel.SplashScreenUiChannel", "OverlayTapBot: Start")
-            context.triggerClick(500f, 700f)
-        }) {
-            Text(text = "Start", fontSize = 18.sp, color = Color.White)
-        }
+//        Button(onClick = {
+//            context.triggerClick(500f, 700f)
+//        }) {
+//            Text(text = "Start", fontSize = 18.sp, color = Color.White)
+//        }
     }
 }

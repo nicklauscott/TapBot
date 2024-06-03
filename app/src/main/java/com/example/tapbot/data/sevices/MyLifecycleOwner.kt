@@ -1,4 +1,4 @@
-package com.example.tapbot.ui.sevices
+package com.example.tapbot.data.sevices
 
 import android.os.Bundle
 import androidx.lifecycle.Lifecycle

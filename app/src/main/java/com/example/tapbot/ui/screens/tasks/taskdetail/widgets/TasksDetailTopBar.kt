@@ -1,5 +1,6 @@
 package com.example.tapbot.ui.screens.tasks.taskdetail.widgets
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,7 +14,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -24,9 +24,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.tapbot.R
 import com.example.tapbot.ui.screens.util.percentOfScreenHeight
 import com.example.tapbot.ui.screens.util.percentOfScreenWidth
 
@@ -35,7 +38,9 @@ fun TasksDetailTopBar(
     modifier: Modifier = Modifier,
     title: String = "",
     canSave: Boolean = false,
-    canPlay: Boolean = false,
+    canRun: Boolean = false,
+    running: Boolean = false,
+    isThisRunningTask: Boolean = false,
     favorite: Boolean = false,
     onClickSave: () -> Unit = { },
     onClickDelete: () -> Unit = { },
@@ -92,7 +97,7 @@ fun TasksDetailTopBar(
                     horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
                 ) {
 
-                    if (!canSave && canPlay) {
+                    if (!canSave && canRun) {
                         IconButton(onClick = onToggleFavorite) {
                             Icon(
                                 imageVector = if (favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
@@ -102,12 +107,15 @@ fun TasksDetailTopBar(
                         }
                     }
 
-                    if (!canSave && canPlay) {
+                    if (!canSave && canRun) {
                         IconButton(onClick = onClickPlay) {
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = "Back Icon",
-                                modifier = Modifier.size(25.dp)
+                            Image(painter = painterResource(id = if (running) R.drawable.pause_icon
+                                else R.drawable.play_arrow_icon),
+                                contentDescription = "Pause/Play Icon",
+                                modifier = Modifier.size(25.dp),
+                                colorFilter = ColorFilter.tint(
+                                    if (running && !isThisRunningTask) MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                                    else MaterialTheme.colorScheme.onBackground)
                             )
                         }
                     }
@@ -122,7 +130,7 @@ fun TasksDetailTopBar(
                         }
                     }
 
-                    if (!canSave && canPlay) {
+                    if (!canSave && canRun) {
                         IconButton(onClick = onClickDelete) {
                             Icon(
                                 imageVector = Icons.Default.Delete,

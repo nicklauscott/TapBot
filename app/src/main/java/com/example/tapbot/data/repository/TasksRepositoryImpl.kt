@@ -54,6 +54,15 @@ class TasksRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteTask(task: Task) {
+        when (task) {
+            is ClickTask -> tasksDatabase.taskDao().deleteClickTaskById(task.id)
+            is DelayTask -> tasksDatabase.taskDao().deleteDelayTaskById(task.id)
+            is StartLoop -> tasksDatabase.taskDao().deleteStartLoopTaskById(task.id)
+            is StopLoop -> tasksDatabase.taskDao().deleteStopLoopTaskById(task.id)
+        }
+    }
+
     override suspend fun deleteTasksGroup(tasksGroupId: String) {
         tasksDatabase.taskDao().deleteTaskGroupWithId(tasksGroupId)
         tasksDatabase.taskDao().deleteClickTasksWithTaskGroupId(tasksGroupId)

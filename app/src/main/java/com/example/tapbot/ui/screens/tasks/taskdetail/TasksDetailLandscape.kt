@@ -42,6 +42,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.tapbot.R
+import com.example.tapbot.data.sevices.ForegroundService
+import com.example.tapbot.data.sevices.TapBotAccessibilityService
 import com.example.tapbot.domain.model.Actions
 import com.example.tapbot.domain.model.ClickTask
 import com.example.tapbot.domain.model.DelayTask
@@ -53,16 +55,16 @@ import com.example.tapbot.ui.screens.tasks.taskdetail.components.DelayActionCell
 import com.example.tapbot.ui.screens.tasks.taskdetail.components.StartLoopActionCell
 import com.example.tapbot.ui.screens.tasks.taskdetail.components.StopLoopActionCell
 import com.example.tapbot.ui.screens.tasks.taskdetail.state_and_events.TaskDetailScreenUiEvent
+import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.AccessibilityDialog
 import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.CompleteDetailDialog
 import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.DeleteDialog
 import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.Fab
+import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.StopTaskDialog
 import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.TasksDetailTopBar
 import com.example.tapbot.ui.screens.util.cornerRadius
 import com.example.tapbot.ui.screens.util.percentOfScreenHeight
 import com.example.tapbot.ui.screens.util.percentOfScreenWidth
 import com.example.tapbot.ui.screens.util.rectangularModifier
-import com.example.tapbot.ui.sevices.ForegroundService
-import com.example.tapbot.ui.sevices.ForegroundService.runTask
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -83,36 +85,9 @@ fun TasksDetailLandscape(navController: NavController, viewModel: TaskDetailView
     val tasks by viewModel.state
 
     val showCompleteDialog = remember { mutableStateOf(false) }
+    val showStopTaskDialog = remember { mutableStateOf(false) }
+    val showEnableAccessibilityDialog = remember { mutableStateOf(false) }
     val showDeleteDialog = remember { mutableStateOf(false) }
-
-    LaunchedEffect(viewModel) {
-        viewModel.channel.collectLatest {
-            when (it) {
-                is TaskDetailViewModel.TaskDetailUiChannel.TaskMangerError -> {
-                    errorMessage.value = it.message
-                    isError.value = true
-                    snackBarHostState.currentSnackbarData?.dismiss()
-                    snackBarHostState.showSnackbar("")
-                }
-
-                is TaskDetailViewModel.TaskDetailUiChannel.TaskMangerWarning -> {
-                    errorMessage.value = it.message
-                    isError.value = false
-                    snackBarHostState.currentSnackbarData?.dismiss()
-                    snackBarHostState.showSnackbar("")
-                }
-
-                is TaskDetailViewModel.TaskDetailUiChannel.RunActions -> {
-                    ForegroundService.apply {
-                        context.runTask(it.actions)
-                    }
-                }
-                TaskDetailViewModel.TaskDetailUiChannel.CompleteTaskDetail -> showCompleteDialog.value = true
-                TaskDetailViewModel.TaskDetailUiChannel.DeletedTask -> navController.popBackStack()
-            }
-        }
-    }
-
 
     if (showCompleteDialog.value) {
         CompleteDetailDialog(
@@ -139,12 +114,56 @@ fun TasksDetailLandscape(navController: NavController, viewModel: TaskDetailView
         }
     }
 
+    if (showStopTaskDialog.value) {
+        StopTaskDialog(
+            modifier = Modifier.height(10.percentOfScreenHeight())
+                .width(15.percentOfScreenWidth())
+                .padding(horizontal = 1.percentOfScreenWidth()),
+            onDismissRequest = { showStopTaskDialog.value = false }) {
+            showStopTaskDialog.value = false
+            viewModel.onEvent(TaskDetailScreenUiEvent.StopOldAndStartNewTask)
+        }
+    }
+
+    if (showEnableAccessibilityDialog.value) {
+        AccessibilityDialog(onDismissRequest = { showEnableAccessibilityDialog.value = false }) {
+            showEnableAccessibilityDialog.value = false
+            ForegroundService.startService<TapBotAccessibilityService>(context)
+        }
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.channel.collectLatest {
+            when (it) {
+                is TaskDetailViewModel.TaskDetailUiChannel.TaskMangerError -> {
+                    errorMessage.value = it.message
+                    isError.value = true
+                    snackBarHostState.currentSnackbarData?.dismiss()
+                    snackBarHostState.showSnackbar("")
+                }
+
+                is TaskDetailViewModel.TaskDetailUiChannel.TaskMangerWarning -> {
+                    errorMessage.value = it.message
+                    isError.value = false
+                    snackBarHostState.currentSnackbarData?.dismiss()
+                    snackBarHostState.showSnackbar("")
+                }
+                TaskDetailViewModel.TaskDetailUiChannel.CompleteTaskDetail -> showCompleteDialog.value = true
+                TaskDetailViewModel.TaskDetailUiChannel.DeletedTask -> navController.popBackStack()
+                TaskDetailViewModel.TaskDetailUiChannel.CancelRunningTask -> showStopTaskDialog.value = true
+                TaskDetailViewModel.TaskDetailUiChannel.EnableAccessibilityService -> showEnableAccessibilityDialog.value = true
+            }
+        }
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TasksDetailTopBar(
                 title = tasks.taskGroup?.name ?: "Loading...",
-                canPlay = tasks.taskGroup != null && tasks.taskList.isNotEmpty(),
+                canRun = tasks.taskGroup != null && tasks.taskList.isNotEmpty(),
+                running = viewModel.serviceState.value.running,
+                isThisRunningTask = viewModel.serviceState.value.runningTaskId == (tasks.taskGroup?.taskGroupId ?: ""),
                 canSave = tasks.canSave(), favorite = tasks.taskGroup?.favorite ?: false,
                 onToggleFavorite = { viewModel.onEvent(TaskDetailScreenUiEvent.ToggleFavorite) },
                 onClickSave = { viewModel.onEvent(TaskDetailScreenUiEvent.SaveTask) },

@@ -11,5 +11,6 @@ interface TasksRepository {
     suspend fun getFavoriteTasksGroup(): Flow<List<TaskGroup>>
     suspend fun getTasksGroupById(tasksGroupId: String): Flow<TaskGroupList>
     suspend fun saveTasksGroup(tasksGroup: TaskGroup, tasks: List<Task>)
+    suspend fun deleteTask(task: Task)
     suspend fun deleteTasksGroup(tasksGroupId: String)
 }

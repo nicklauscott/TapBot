@@ -3,7 +3,6 @@ package com.example.tapbot.ui.screens.tasks.taskdetail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,13 +13,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
@@ -31,8 +26,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,19 +35,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.tapbot.R
+import com.example.tapbot.data.sevices.ForegroundService
+import com.example.tapbot.data.sevices.TapBotAccessibilityService
 import com.example.tapbot.domain.model.Actions
 import com.example.tapbot.domain.model.ClickTask
 import com.example.tapbot.domain.model.DelayTask
@@ -66,15 +53,16 @@ import com.example.tapbot.ui.screens.tasks.taskdetail.components.StartLoopAction
 import com.example.tapbot.ui.screens.tasks.taskdetail.components.StopLoopActionCell
 import com.example.tapbot.ui.screens.tasks.taskdetail.state_and_events.TaskDetailScreenUiEvent
 import com.example.tapbot.ui.screens.tasks.taskdetail.components.ActionCell
+import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.AccessibilityDialog
 import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.CompleteDetailDialog
 import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.DeleteDialog
 import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.Fab
+import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.StopTaskDialog
 import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.TasksDetailTopBar
 import com.example.tapbot.ui.screens.util.cornerRadius
 import com.example.tapbot.ui.screens.util.percentOfScreenHeight
 import com.example.tapbot.ui.screens.util.percentOfScreenWidth
 import com.example.tapbot.ui.screens.util.rectangularModifier
-import com.example.tapbot.ui.sevices.ForegroundService
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -83,7 +71,6 @@ import kotlinx.coroutines.launch
 fun TasksDetailPortrait(
     navController: NavController, viewModel: TaskDetailViewModel, snackBarHostState: SnackbarHostState
 ) {
-
     val context = LocalContext.current
 
     val sheetState = rememberModalBottomSheetState()
@@ -96,6 +83,8 @@ fun TasksDetailPortrait(
     val tasks by viewModel.state
 
     val showCompleteDialog = remember { mutableStateOf(false) }
+    val showStopTaskDialog = remember { mutableStateOf(false) }
+    val showEnableAccessibilityDialog = remember { mutableStateOf(false) }
     val showDeleteDialog = remember { mutableStateOf(false) }
 
     if (showCompleteDialog.value) {
@@ -111,6 +100,20 @@ fun TasksDetailPortrait(
         DeleteDialog( onDismissRequest = { showDeleteDialog.value = false }) {
             showDeleteDialog.value = false
             viewModel.onEvent(TaskDetailScreenUiEvent.DeleteTask)
+        }
+    }
+
+    if (showStopTaskDialog.value) {
+        StopTaskDialog(onDismissRequest = { showStopTaskDialog.value = false }) {
+            showStopTaskDialog.value = false
+            viewModel.onEvent(TaskDetailScreenUiEvent.StopOldAndStartNewTask)
+        }
+    }
+
+    if (showEnableAccessibilityDialog.value) {
+        AccessibilityDialog(onDismissRequest = { showEnableAccessibilityDialog.value = false }) {
+            showEnableAccessibilityDialog.value = false
+            ForegroundService.startService<TapBotAccessibilityService>(context)
         }
     }
 
@@ -131,14 +134,10 @@ fun TasksDetailPortrait(
                     snackBarHostState.currentSnackbarData?.dismiss()
                     snackBarHostState.showSnackbar("")
                 }
-
-                is TaskDetailViewModel.TaskDetailUiChannel.RunActions -> {
-                    ForegroundService.apply {
-                        context.runTask(it.actions)
-                    }
-                }
                 TaskDetailViewModel.TaskDetailUiChannel.CompleteTaskDetail -> showCompleteDialog.value = true
                 TaskDetailViewModel.TaskDetailUiChannel.DeletedTask -> navController.popBackStack()
+                TaskDetailViewModel.TaskDetailUiChannel.CancelRunningTask -> showStopTaskDialog.value = true
+                TaskDetailViewModel.TaskDetailUiChannel.EnableAccessibilityService -> showEnableAccessibilityDialog.value = true
             }
         }
     }
@@ -148,7 +147,9 @@ fun TasksDetailPortrait(
         topBar = {
             TasksDetailTopBar(
                 title = tasks.taskGroup?.name ?: "Loading...",
-                canPlay = tasks.taskGroup != null && tasks.taskList.isNotEmpty(),
+                canRun = tasks.taskGroup != null && tasks.taskList.isNotEmpty(),
+                running = viewModel.serviceState.value.running,
+                isThisRunningTask = viewModel.serviceState.value.runningTaskId == tasks.taskGroup?.taskGroupId,
                 canSave = tasks.canSave(), favorite = tasks.taskGroup?.favorite ?: false,
                 onToggleFavorite = { viewModel.onEvent(TaskDetailScreenUiEvent.ToggleFavorite) },
                 onClickSave = { viewModel.onEvent(TaskDetailScreenUiEvent.SaveTask) },

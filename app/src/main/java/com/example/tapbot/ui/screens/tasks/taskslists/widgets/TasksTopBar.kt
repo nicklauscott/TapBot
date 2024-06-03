@@ -1,5 +1,6 @@
 package com.example.tapbot.ui.screens.tasks.taskslists.widgets
 
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -31,11 +33,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,6 +61,16 @@ fun TasksTopBar(
     onDone: () -> Unit = { },
     onCancelSearch: () -> Unit = { }
 ) {
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
+
+    if (isSearch) {
+        focusRequester.requestFocus()
+        keyboardController?.show()
+    }else{
+        keyboardController?.hide()
+    }
 
     Row {
 
@@ -92,7 +108,7 @@ fun TasksTopBar(
                 ) {
                     IconButton(onClick = onclickFavorite) {
                         Icon(
-                            imageVector = if (!showingFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            imageVector = if (showingFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = "Search Icon",
                             modifier = Modifier.size(30.dp)
                         )
@@ -159,7 +175,8 @@ fun TasksTopBar(
                         TextField(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .fillMaxHeight(),
+                                .fillMaxHeight()
+                                .focusRequester(focusRequester),
                             value = searchText,
                             colors = TextFieldDefaults.colors(
                                 focusedContainerColor = Color.Transparent,
@@ -174,7 +191,10 @@ fun TasksTopBar(
                             },
                             maxLines = 1,
                             trailingIcon = {
-                                IconButton(onClick = onCancelSearch ) {
+                                IconButton(onClick = {
+                                    keyboardController?.hide()
+                                    onCancelSearch()
+                                } ) {
                                     Icon(
                                         imageVector = Icons.Default.Clear,
                                         contentDescription = "Cancel Icon",

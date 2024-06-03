@@ -1,5 +1,6 @@
 package com.example.tapbot.ui.screens.tasks.taskdetail
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -7,14 +8,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.tapbot.domain.model.AccessibilityServiceNotEnabledException
 import com.example.tapbot.domain.model.Actions
+import com.example.tapbot.domain.model.ServiceState
 import com.example.tapbot.domain.model.Task
-import com.example.tapbot.domain.model.TaskGroup
+import com.example.tapbot.domain.model.TaskAlreadyRunningException
 import com.example.tapbot.domain.usecases.DeleteActions
 import com.example.tapbot.domain.usecases.GetTaskGroupAction
 import com.example.tapbot.domain.usecases.SaveActions
+import com.example.tapbot.domain.usecases.service.TapService
 import com.example.tapbot.domain.usecases.taskbuilder.TaskBuilder
-import com.example.tapbot.domain.usecases.taskbuilder.TaskManager
 import com.example.tapbot.domain.usecases.taskbuilder.TaskManagerError
 import com.example.tapbot.domain.usecases.taskbuilder.TaskManagerWarning
 import com.example.tapbot.ui.screens.tasks.taskdetail.state_and_events.TaskDetailScreenState
@@ -32,6 +35,7 @@ class TaskDetailViewModel @Inject constructor(
     private val getTaskGroupAction: GetTaskGroupAction,
     private val saveActions: SaveActions,
     private val deleteActions: DeleteActions,
+    private val tapService: TapService,
     saveStateHandle: SavedStateHandle
 ): ViewModel() {
 
@@ -40,8 +44,14 @@ class TaskDetailViewModel @Inject constructor(
     private val _state: MutableState<TaskDetailScreenState> = mutableStateOf(TaskDetailScreenState())
     val state: State<TaskDetailScreenState> = _state
 
+    private val tempDeletedTask = mutableListOf<Task>()
+
+    private val _serviceState: MutableState<ServiceState> = mutableStateOf(ServiceState())
+    val serviceState: State<ServiceState> = _serviceState
+
     private val _channel: Channel<TaskDetailUiChannel> = Channel(Channel.BUFFERED)
     val channel = _channel.receiveAsFlow()
+
 
     init {
         val taskGroupId = saveStateHandle.get<String>("taskId")
@@ -68,6 +78,9 @@ class TaskDetailViewModel @Inject constructor(
                 _state.value = TaskDetailScreenState(loading = false, taskGroup = newTaskGroup)
                 state.value.update(taskGroup = newTaskGroup, taskList = state.value.taskList)
             }
+        }
+        viewModelScope.launch {
+            tapService().collect { _serviceState.value = it }
         }
     }
 
@@ -101,13 +114,30 @@ class TaskDetailViewModel @Inject constructor(
                     }
                 }
             }
+            TaskDetailScreenUiEvent.StopOldAndStartNewTask -> {
+                tapService.stopTask()
+                _serviceState.value = tapService().value
+                play()
+            }
         }
     }
 
     private fun play() {
+        if (state.value.taskGroup?.taskGroupId == serviceState.value.runningTaskId) {
+            tapService.stopTask()
+            return
+        }
+
         viewModelScope.launch(Dispatchers.IO) {
             val taskList = taskBuilder.getActions()
-            _channel.send(TaskDetailUiChannel.RunActions(taskList))
+            try {
+                tapService.startTask(state.value.taskGroup?.taskGroupId ?: "", taskList)
+                _serviceState.value = tapService().value
+            }catch (ex: TaskAlreadyRunningException) {
+                _channel.send(TaskDetailUiChannel.CancelRunningTask)
+            }catch (ex: AccessibilityServiceNotEnabledException) {
+                _channel.send(TaskDetailUiChannel.EnableAccessibilityService)
+            }
         }
     }
 
@@ -120,8 +150,11 @@ class TaskDetailViewModel @Inject constructor(
         }
         _state.value = state.value.copy(saving = true)
         viewModelScope.launch(Dispatchers.IO) {
+
             // save to database
-            state.value.taskGroup?.let { saveActions(it, taskBuilder.build()) }
+            val builtTask = taskBuilder.build()
+            state.value.taskGroup?.let { saveActions(it, builtTask) }
+            tempDeletedTask.forEach { deleteActions.deleteTask(it) }
 
             // update state
             withContext(Dispatchers.Main) {
@@ -135,6 +168,7 @@ class TaskDetailViewModel @Inject constructor(
         try {
             if (taskBuilder.canDeleteTask(index)) {
                 state.value.taskList.toMutableList().also {
+                    tempDeletedTask.add(it[index])
                     it.removeAt(index)
                     state.value.update(taskList = it)
                     _state.value = state.value.copy(taskList = it)
@@ -143,6 +177,7 @@ class TaskDetailViewModel @Inject constructor(
             }
         }catch (warning: TaskManagerWarning) {
             state.value.taskList.toMutableList().also {
+                tempDeletedTask.add(it[index])
                 it.removeAt(index)
                 state.value.update(taskList = it)
                 _state.value = state.value.copy(taskList = it)
@@ -196,10 +231,10 @@ class TaskDetailViewModel @Inject constructor(
     sealed class TaskDetailUiChannel {
         data class TaskMangerError(val message: String): TaskDetailUiChannel()
         data class TaskMangerWarning(val message: String): TaskDetailUiChannel()
-        data class RunActions(val actions: List<TaskManager.Action>): TaskDetailUiChannel()
         object CompleteTaskDetail: TaskDetailUiChannel()
+        object CancelRunningTask: TaskDetailUiChannel()
+        object EnableAccessibilityService: TaskDetailUiChannel()
         object DeletedTask: TaskDetailUiChannel()
     }
-
 
 }

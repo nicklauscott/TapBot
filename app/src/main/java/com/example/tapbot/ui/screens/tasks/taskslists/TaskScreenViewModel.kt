@@ -1,5 +1,6 @@
 package com.example.tapbot.ui.screens.tasks.taskslists
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +60,15 @@ class TaskScreenViewModel @Inject constructor(
                     searchTaskGroup(event.query).collect { taskGroups ->
                         withContext(Dispatchers.Main) {
                             _state.value = state.value.copy(tasks = taskGroups)
+                        }
+                    }
+                }
+            }
+            TasksScreenUiEvent.ClearSearch -> {
+                viewModelScope.launch {
+                    getAllTaskGroup.invoke().collect {
+                        withContext(Dispatchers.Main) {
+                            _state.value = state.value.copy(loading = false, tasks = it, showingFavorite = false)
                         }
                     }
                 }

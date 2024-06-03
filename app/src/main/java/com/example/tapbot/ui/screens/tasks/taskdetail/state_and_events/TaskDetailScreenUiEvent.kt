@@ -1,5 +1,6 @@
 package com.example.tapbot.ui.screens.tasks.taskdetail.state_and_events
 
+import android.content.Context
 import com.example.tapbot.domain.model.Actions
 import com.example.tapbot.domain.model.Task
 import com.example.tapbot.domain.model.TaskGroup
@@ -14,4 +15,5 @@ sealed class TaskDetailScreenUiEvent {
     object ToggleFavorite: TaskDetailScreenUiEvent()
     object DeleteTask: TaskDetailScreenUiEvent()
     object PlayTask: TaskDetailScreenUiEvent()
+    object StopOldAndStartNewTask: TaskDetailScreenUiEvent()
 }

@@ -1,6 +1,6 @@
 package com.example.tapbot.domain.usecases.taskbuilder
 
-import android.util.Log
+import com.example.tapbot.domain.model.Action
 import com.example.tapbot.domain.model.ClickTask
 import com.example.tapbot.domain.model.DelayTask
 import com.example.tapbot.domain.model.StartLoop
@@ -28,11 +28,12 @@ class TaskBuilder(taskGroup: TaskGroup?) {
 
     fun getTaskGroup(): TaskGroup {
         val taskGroup = TaskGroup(taskGroupId = tasGroupId)
-        Log.d("TaskDetailViewModel", tasGroupId)
         return taskGroup
     }
 
     fun pushOldTask(tasks: List<Task>) {
+        startLoopCount = tasks.filterIsInstance<StartLoop>().size
+        lastTask = tasks.last()
         taskManager.pushOldTask(tasks)
     }
 
@@ -59,7 +60,7 @@ class TaskBuilder(taskGroup: TaskGroup?) {
         return taskManager.getTasks()
     }
 
-    fun getActions(): List<TaskManager.Action> {
+    fun getActions(): List<Action> {
         taskManager.buildTasks().also { return taskManager.buildAction() }
     }
 

@@ -3,7 +3,7 @@ package com.example.tapbot.domain.utils
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import com.example.tapbot.ui.sevices.TapBotForegroundService
+import com.example.tapbot.data.sevices.TapBotForegroundService
 
 fun startTapBotForegroundService(context: Context) {
     val serviceIntent = Intent(context, TapBotForegroundService::class.java)
