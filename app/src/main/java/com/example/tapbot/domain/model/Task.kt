@@ -167,7 +167,7 @@ object StopLoopCondition {
     }
 
     fun check(time: Int, operator: Operator, elapsedTime: Long): Boolean{
-        val checker = LongChecker(firstType = time * 1000L, condition = operator, secondType = elapsedTime)
+        val checker = LongChecker(firstType = time.toLong(), condition = operator, secondType = elapsedTime / 1000L)
         return runConditionLong(checker)
     }
 
