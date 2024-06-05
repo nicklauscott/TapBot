@@ -52,11 +52,11 @@ fun ScreenCoordinates(
             horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically
         ) {
             CoordinateCell(
-                modifier = Modifier, symbol = "X", selectedItem = task.x.toString(), range = range, assist = assist) { onChangeX(it) }
+                modifier = modifier, symbol = "X", selectedItem = task.x.toString(), range = range, assist = assist) { onChangeX(it) }
 
             Spacer(modifier = Modifier.width(2.percentOfScreenWidth()))
 
-            CoordinateCell(modifier = Modifier, symbol = "Y", selectedItem = task.y.toString(), range = range, assist = assist) { onChangeY(it) }
+            CoordinateCell(modifier = modifier, symbol = "Y", selectedItem = task.y.toString(), range = range, assist = assist) { onChangeY(it) }
         }
     }
 }
@@ -76,7 +76,7 @@ fun CoordinateCell(
 
         Spacer(modifier = Modifier.width(1.percentOfScreenWidth()))
 
-        CustomSpinner(selectedItem = selectedItem, items = range, assist = assist) {
+        CustomSpinner(modifier = modifier, selectedItem = selectedItem, items = range, assist = assist) {
             onClick(it)
         }
     }

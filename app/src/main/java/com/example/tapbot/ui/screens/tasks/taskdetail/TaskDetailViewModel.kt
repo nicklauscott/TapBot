@@ -107,6 +107,12 @@ class TaskDetailViewModel @Inject constructor(
                 }
             }
             TaskDetailScreenUiEvent.DeleteTask -> {
+                if (serviceState.value.running && serviceState.value.runningTaskId == state.value.taskGroup?.taskGroupId) {
+                    viewModelScope.launch {
+                        _channel.send(TaskDetailUiChannel.TaskMangerError("Cannot delete running task"))
+                    }
+                    return
+                }
                 viewModelScope.launch(Dispatchers.IO) {
                     state.value.taskGroup?.let { deleteActions(it.taskGroupId) }
                     withContext(Dispatchers.Main) {
@@ -165,6 +171,13 @@ class TaskDetailViewModel @Inject constructor(
     }
 
     private fun deleteTask(index: Int) {
+        if (serviceState.value.running && serviceState.value.runningTaskId == state.value.taskGroup?.taskGroupId) {
+            viewModelScope.launch {
+                _channel.send(TaskDetailUiChannel.TaskMangerError("Cannot delete running task"))
+            }
+            return
+        }
+
         try {
             if (taskBuilder.canDeleteTask(index)) {
                 state.value.taskList.toMutableList().also {
@@ -197,6 +210,13 @@ class TaskDetailViewModel @Inject constructor(
     }
 
     private fun editTask(index: Int, task: Task) {
+        if (serviceState.value.running && serviceState.value.runningTaskId == state.value.taskGroup?.taskGroupId) {
+            viewModelScope.launch {
+                _channel.send(TaskDetailUiChannel.TaskMangerError("Cannot edit running task"))
+            }
+            return
+        }
+
         val newTaskList = state.value.taskList.toMutableList()
         newTaskList.removeAt(index)
         newTaskList.add(index, task)
@@ -206,6 +226,13 @@ class TaskDetailViewModel @Inject constructor(
     }
 
     private fun addTask(task: Actions) {
+        if (serviceState.value.running && serviceState.value.runningTaskId == state.value.taskGroup?.taskGroupId) {
+            viewModelScope.launch {
+                _channel.send(TaskDetailUiChannel.TaskMangerError("Cannot edit running task"))
+            }
+            return
+        }
+
         try {
              when (task) {
                  Actions.CLICK -> taskBuilder.click()
