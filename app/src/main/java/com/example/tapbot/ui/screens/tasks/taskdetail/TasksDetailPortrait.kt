@@ -113,6 +113,7 @@ fun TasksDetailPortrait(
     if (showEnableAccessibilityDialog.value) {
         AccessibilityDialog(onDismissRequest = { showEnableAccessibilityDialog.value = false }) {
             showEnableAccessibilityDialog.value = false
+            ForegroundService.accessibilityRequest(context)
             ForegroundService.startService<TapBotAccessibilityService>(context)
         }
     }

@@ -35,6 +35,11 @@ object ForegroundService {
         return !checkServiceRunning<TapBotForegroundService>(context)
     }
 
+    fun accessibilityRequest(context: Context) {
+        val intent = Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)
+        context.startActivity(intent)
+    }
+
     @SuppressLint("ServiceCast")
     inline fun <reified T> checkServiceRunning(context: Context): Boolean {
         val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager

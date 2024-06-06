@@ -75,6 +75,11 @@ class ServiceManager(val context: Context) {
         sendBroadcast(intent)
     }
 
+    private fun Context.isScreenOn(): Boolean {
+        val powerManager = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+        return powerManager.isInteractive
+    }
+
     private fun runTask(actions: List<Action>): Job {
 
         val loopTasks = mutableListOf<Map<String, List<List<String>>>>() // map { loopId, list [ [time, total], [count, total] ] }
@@ -90,14 +95,27 @@ class ServiceManager(val context: Context) {
 
         val job = CoroutineScope(Dispatchers.IO).launch {
             actions.forEach { action ->
+                if (!context.isScreenOn()) {
+                    currentTask = ""
+                    _state.value = state.value.copy(running = false, runningTaskId = null, extraInfo = "Screen is off")
+                    context.cleanUp()
+                    return@launch
+                }
                 if (action is IndividualTask) {
                     if (action.task is ClickTask) {
                         currentTask = "Clicking"
                         context.sendOverlayData(currentTask, loopTasks.map { it.values }.flatten().flatten())
                         action.task.delayBeforeTask?.let { delayTime -> delay(delayTime.toLong()) }
                         repeat(action.task.clickCount) { _ ->
-                            context.sendClick(action.task.x, action.task.y)
-                            delay(action.task.delayBetweenClicks.toLong())
+                            if (!context.isScreenOn()) {
+                                currentTask = ""
+                                _state.value = state.value.copy(running = false, runningTaskId = null, extraInfo = "Screen is off")
+                                context.cleanUp()
+                                return@launch
+                            } else {
+                                context.sendClick(action.task.x, action.task.y)
+                                delay(action.task.delayBetweenClicks.toLong())
+                            }
                         }
                     }
 
@@ -115,7 +133,7 @@ class ServiceManager(val context: Context) {
                     var keepRunning = true
                     var loopId = ""
 
-                    while (isActive && keepRunning) {
+                    while (isActive && keepRunning && context.isScreenOn()) {
                         currentIteration++
 
                         val currentLoopDetail = loopTasks.find { it.keys.first() == loopId }
@@ -145,8 +163,15 @@ class ServiceManager(val context: Context) {
                                 context.sendOverlayData(currentTask, loopTasks.map { it.values }.flatten().flatten())
                                 eachAction.delayBeforeTask?.let { delayTime -> delay(delayTime.toLong()) }
                                 repeat(eachAction.clickCount) { _ ->
-                                    context.sendClick(eachAction.x, eachAction.y)
-                                    delay(eachAction.delayBetweenClicks.toLong())
+                                    if (!context.isScreenOn()) {
+                                        currentTask = ""
+                                        _state.value = state.value.copy(running = false, runningTaskId = null, extraInfo = "Screen is off")
+                                        context.cleanUp()
+                                        return@launch
+                                    } else {
+                                        context.sendClick(eachAction.x, eachAction.y)
+                                        delay(eachAction.delayBetweenClicks.toLong())
+                                    }
                                 }
                             }
 
@@ -195,11 +220,11 @@ class ServiceManager(val context: Context) {
                 }
             }
             currentTask = ""
-            _state.value = state.value.copy(running = false, runningTaskId = null)
+            _state.value = state.value.copy(running = false, runningTaskId = null,
+                extraInfo = if (context.isScreenOn()) "Task completed" else "Screen is off")
             context.cleanUp()
         }
         return job
     }
-
 
 }
