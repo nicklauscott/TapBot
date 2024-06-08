@@ -1,6 +1,8 @@
 package com.example.tapbot.ui.screens.tasks.taskdetail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,8 +38,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -54,6 +59,7 @@ import com.example.tapbot.ui.screens.tasks.taskdetail.components.ClickActionCell
 import com.example.tapbot.ui.screens.tasks.taskdetail.components.DelayActionCell
 import com.example.tapbot.ui.screens.tasks.taskdetail.components.StartLoopActionCell
 import com.example.tapbot.ui.screens.tasks.taskdetail.components.StopLoopActionCell
+import com.example.tapbot.ui.screens.tasks.taskdetail.components.rememberDragDropListState
 import com.example.tapbot.ui.screens.tasks.taskdetail.state_and_events.TaskDetailScreenUiEvent
 import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.AccessibilityDialog
 import com.example.tapbot.ui.screens.tasks.taskdetail.widgets.CompleteDetailDialog
@@ -65,6 +71,7 @@ import com.example.tapbot.ui.screens.util.cornerRadius
 import com.example.tapbot.ui.screens.util.percentOfScreenHeight
 import com.example.tapbot.ui.screens.util.percentOfScreenWidth
 import com.example.tapbot.ui.screens.util.rectangularModifier
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -83,6 +90,11 @@ fun TasksDetailLandscape(navController: NavController, viewModel: TaskDetailView
     val isError = remember { mutableStateOf(true) }
 
     val tasks by viewModel.state
+
+    val overScrollJob = remember { mutableStateOf<Job?>(null) }
+    val dragDropListState = rememberDragDropListState(onMove = { fromIndex, toIndex ->
+        viewModel.onEvent(TaskDetailScreenUiEvent.ReOrder(fromIndex, toIndex))
+    })
 
     val showCompleteDialog = remember { mutableStateOf(false) }
     val showStopTaskDialog = remember { mutableStateOf(false) }
@@ -300,8 +312,32 @@ fun TasksDetailLandscape(navController: NavController, viewModel: TaskDetailView
 
                     LazyColumn(
                         modifier = Modifier
+                            .pointerInput(Unit) {
+                                detectDragGesturesAfterLongPress(
+                                    onDrag = { change, offset ->
+                                        change.consume()
+                                        dragDropListState.onDrag(offset)
+
+                                        if (overScrollJob.value?.isActive == true)
+                                            return@detectDragGesturesAfterLongPress
+
+                                        dragDropListState
+                                            .checkOverScroll()
+                                            .takeIf { it != 0f }
+                                            ?.let {
+                                                overScrollJob.value = scope.launch {
+                                                    dragDropListState.lazyListState.scrollBy(it)
+                                                }
+                                            } ?: run { overScrollJob.value?.cancel() }
+                                    },
+                                    onDragStart = { offset -> dragDropListState.onDragStart(offset) },
+                                    onDragEnd = { dragDropListState.onDragInterrupted() },
+                                    onDragCancel = { dragDropListState.onDragInterrupted() },
+                                )
+                            }
                             .fillMaxSize()
-                            .padding(horizontal = 2.percentOfScreenWidth())
+                            .padding(horizontal = 2.percentOfScreenWidth()),
+                        state = dragDropListState.lazyListState
                     ) {
 
                         item {
@@ -312,6 +348,15 @@ fun TasksDetailLandscape(navController: NavController, viewModel: TaskDetailView
                             if (task is ClickTask) {
                                 ClickActionCellLandscape(
                                     modifier = Modifier.height(8.percentOfScreenHeight()),
+                                    cellModifier = Modifier
+                                        .composed {
+                                            val offsetOrNull = dragDropListState.elementDisplacement.takeIf {
+                                                index == dragDropListState.currentIndexOfDraggedItem
+                                            }
+                                            Modifier.graphicsLayer {
+                                                translationY = offsetOrNull ?: 0f
+                                            }
+                                        },
                                     task = task, onclickDelete = {
                                     viewModel.onEvent(TaskDetailScreenUiEvent.DeleteAction(index))
                                 }) { newTask ->
@@ -322,6 +367,15 @@ fun TasksDetailLandscape(navController: NavController, viewModel: TaskDetailView
                             if (task is DelayTask) {
                                 DelayActionCell(
                                     modifier = Modifier.height(8.percentOfScreenHeight()),
+                                    cellModifier = Modifier
+                                        .composed {
+                                            val offsetOrNull = dragDropListState.elementDisplacement.takeIf {
+                                                index == dragDropListState.currentIndexOfDraggedItem
+                                            }
+                                            Modifier.graphicsLayer {
+                                                translationY = offsetOrNull ?: 0f
+                                            }
+                                        },
                                     task = task, onEditTask = { newTask ->
                                     viewModel.onEvent(TaskDetailScreenUiEvent.EditAction(index, newTask))
                                 }) {
@@ -332,6 +386,15 @@ fun TasksDetailLandscape(navController: NavController, viewModel: TaskDetailView
                             if (task is StartLoop) {
                                 StartLoopActionCell(
                                     modifier = Modifier.height(8.percentOfScreenHeight()),
+                                    cellModifier = Modifier
+                                        .composed {
+                                            val offsetOrNull = dragDropListState.elementDisplacement.takeIf {
+                                                index == dragDropListState.currentIndexOfDraggedItem
+                                            }
+                                            Modifier.graphicsLayer {
+                                                translationY = offsetOrNull ?: 0f
+                                            }
+                                        },
                                     task = task, onEditTask = { newTask ->
                                     viewModel.onEvent(TaskDetailScreenUiEvent.EditAction(index, newTask))
                                 }) {
@@ -343,6 +406,15 @@ fun TasksDetailLandscape(navController: NavController, viewModel: TaskDetailView
                                 val parentLoop = tasks.taskList.filterIsInstance<StartLoop>().find { it.id == task.prentLoopId }
                                 StopLoopActionCell(
                                     modifier = Modifier.height(8.percentOfScreenHeight()),
+                                    cellModifier = Modifier
+                                        .composed {
+                                            val offsetOrNull = dragDropListState.elementDisplacement.takeIf {
+                                                index == dragDropListState.currentIndexOfDraggedItem
+                                            }
+                                            Modifier.graphicsLayer {
+                                                translationY = offsetOrNull ?: 0f
+                                            }
+                                        },
                                     task = task, startLoop = parentLoop, onEditTask = { newTask ->
                                     viewModel.onEvent(TaskDetailScreenUiEvent.EditAction(index, newTask))
                                 }) {

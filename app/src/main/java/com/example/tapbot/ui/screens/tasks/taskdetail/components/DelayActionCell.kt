@@ -28,10 +28,10 @@ import com.example.tapbot.ui.screens.util.percentOfScreenWidth
 import com.example.tapbot.ui.theme.delay_action
 
 @Composable
-fun DelayActionCell(modifier: Modifier = Modifier, task: DelayTask, onEditTask: (DelayTask) -> Unit,
+fun DelayActionCell(modifier: Modifier = Modifier, cellModifier: Modifier = Modifier, task: DelayTask, onEditTask: (DelayTask) -> Unit,
                     onclickDelete: () -> Unit) {
     Column(
-        modifier = Modifier
+        modifier = cellModifier
             .padding(vertical = 0.4.percentOfScreenHeight())
             .fillMaxWidth()
             .clip(RoundedCornerShape(4.dp))

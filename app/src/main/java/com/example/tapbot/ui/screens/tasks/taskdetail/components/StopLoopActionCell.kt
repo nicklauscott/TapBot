@@ -39,7 +39,7 @@ import com.example.tapbot.ui.theme.stopLoop_action
 
 @Composable
 fun StopLoopActionCell(
-    modifier: Modifier = Modifier, task: StopLoop, startLoop: StartLoop? = null,
+    modifier: Modifier = Modifier, cellModifier: Modifier = Modifier, task: StopLoop, startLoop: StartLoop? = null,
     onEditTask: (StopLoop) -> Unit, onclickDelete: () -> Unit
 ) {
 
@@ -47,7 +47,7 @@ fun StopLoopActionCell(
     val useOneCondition = remember { mutableStateOf(task.useOneCondition) }
 
     Column(
-        modifier = Modifier
+        modifier = cellModifier
             .padding(top = 0.4.percentOfScreenHeight())
             .fillMaxWidth()
             .clip(RoundedCornerShape(4.dp))

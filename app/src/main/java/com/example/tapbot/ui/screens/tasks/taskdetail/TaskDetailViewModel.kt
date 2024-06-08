@@ -1,6 +1,5 @@
 package com.example.tapbot.ui.screens.tasks.taskdetail
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -125,6 +124,8 @@ class TaskDetailViewModel @Inject constructor(
                 _serviceState.value = tapService().value
                 play()
             }
+
+            is TaskDetailScreenUiEvent.ReOrder -> reOrder(event.from, event.to)
         }
     }
 
@@ -169,6 +170,31 @@ class TaskDetailViewModel @Inject constructor(
             }
         }
     }
+
+    private fun reOrder(from: Int, to: Int) {
+        if (from == to || from < 0 || from > state.value.taskList.size - 1
+            || to < 0 || to > state.value.taskList.size - 1) return
+
+        try {
+            val reOrder = taskBuilder.canReorder(from, to)
+            if (reOrder) {
+                val tempList = state.value.taskList.toMutableList()
+                val element = tempList.removeAt(from)
+                tempList.add(to, element)
+
+                state.value.update(taskList = tempList)
+                _state.value = state.value.copy(taskList = tempList)
+                taskBuilder.pushOldTask(state.value.taskList)
+            }
+        } catch (ex: TaskManagerError) {
+            viewModelScope.launch {
+                _channel.send(TaskDetailUiChannel.TaskMangerError(ex.message.toString()))
+            }
+        }catch (ex: Exception) {
+            Log.e("TaskDetailViewModel", ex.message.toString())
+        }
+    }
+
 
     private fun deleteTask(index: Int) {
         if (serviceState.value.running && serviceState.value.runningTaskId == state.value.taskGroup?.taskGroupId) {

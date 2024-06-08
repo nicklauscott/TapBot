@@ -1,6 +1,5 @@
 package com.example.tapbot.domain.usecases.taskbuilder
 
-import android.util.Log
 import com.example.tapbot.domain.model.Action
 import com.example.tapbot.domain.model.ClickTask
 import com.example.tapbot.domain.model.DelayTask
@@ -87,7 +86,7 @@ class TaskManager {
     }
 
 
-    fun buildAction(): List<Action> { // gpt
+    fun buildAction(): List<Action> {
         val actions = mutableListOf<Action>()
 
         // get looped tasks
@@ -137,6 +136,46 @@ class TaskManager {
         this.tasks.addAll(tasks)
         loopCount = this.tasks.count { it is StartLoop }
         stopLoopCount = this.tasks.count { it is StopLoop }
+    }
+
+    fun canReorder(from: Int, to: Int): Boolean {
+        val task = tasks[from]
+        if (task is StopLoop && to <= 1) {
+            throw TaskManagerError("Cannot come before or right after start loop")
+        }
+
+        if (task is StopLoop) {
+            val prevTask = tasks[to]
+            if (prevTask is StartLoop) {
+                throw TaskManagerError("Cannot come right after start loop")
+            }
+        }
+
+        if (task is StopLoop) {
+            val tasksAhead = tasks.take(to)
+            val startLoops = tasksAhead.count { it is StartLoop }
+            val stopLoops = tasksAhead.count { it is StopLoop }
+
+            if ((from > to && startLoops == stopLoops) || stopLoops > startLoops) {
+                throw TaskManagerError("No loop to stop")
+            }
+
+        }
+
+        if (task !is StopLoop) {
+            // from
+            val fromUp = tasks[from - 1]
+            val fromDown = tasks[from + 1]
+            if (from < tasks.size - 2 && fromUp is StartLoop && fromDown is StopLoop
+                || fromUp is StopLoop && fromDown is StartLoop) return false
+
+            // to
+            val toUp = tasks[to - 1]
+            val toDown = tasks[to + 1]
+            if (to < tasks.size - 1 && toUp is StartLoop && toDown is StopLoop ||
+                toUp is StopLoop && toDown is StartLoop) return false
+        }
+        return true
     }
 
 }

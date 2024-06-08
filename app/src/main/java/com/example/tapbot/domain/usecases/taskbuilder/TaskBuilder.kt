@@ -26,6 +26,10 @@ class TaskBuilder(taskGroup: TaskGroup?) {
         }
     }
 
+    fun canReorder(from: Int, to: Int): Boolean {
+        return taskManager.canReorder(from, to)
+    }
+
     fun getTaskGroup(): TaskGroup {
         val taskGroup = TaskGroup(taskGroupId = tasGroupId)
         return taskGroup

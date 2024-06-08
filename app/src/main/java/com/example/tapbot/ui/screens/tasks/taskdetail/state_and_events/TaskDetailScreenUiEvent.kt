@@ -10,6 +10,7 @@ sealed class TaskDetailScreenUiEvent {
     data class DeleteAction(val taskIndex: Int) : TaskDetailScreenUiEvent()
     data class EditAction(val index: Int, val task: Task) : TaskDetailScreenUiEvent()
     class CompleteTask(val name: String, val description: String?) : TaskDetailScreenUiEvent()
+    data class ReOrder(val from: Int, val to: Int) : TaskDetailScreenUiEvent()
 
     object SaveTask: TaskDetailScreenUiEvent()
     object ToggleFavorite: TaskDetailScreenUiEvent()

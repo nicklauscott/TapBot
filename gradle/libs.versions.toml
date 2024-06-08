@@ -20,6 +20,7 @@ material3Version = "1.2.1"
 adaptiveNavigationVersion = "1.0.0-alpha05"
 gsonVersion = "2.10.1"
 
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

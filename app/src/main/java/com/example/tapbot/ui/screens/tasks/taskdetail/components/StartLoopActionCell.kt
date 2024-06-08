@@ -30,10 +30,10 @@ import com.example.tapbot.ui.screens.util.percentOfScreenWidth
 import com.example.tapbot.ui.theme.startLoop_action
 
 @Composable
-fun StartLoopActionCell(modifier: Modifier = Modifier, task: StartLoop, onEditTask: (StartLoop) -> Unit,
+fun StartLoopActionCell(modifier: Modifier = Modifier, cellModifier: Modifier = Modifier, task: StartLoop, onEditTask: (StartLoop) -> Unit,
                         onclickDelete: () -> Unit) {
     Column(
-        modifier = Modifier
+        modifier = cellModifier
             .padding(vertical = 0.4.percentOfScreenHeight())
             .fillMaxWidth()
             .clip(RoundedCornerShape(4.dp))
