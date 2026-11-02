@@ -10,7 +10,6 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.example.tapbot.R
 
-
 class TapBotForegroundService: Service() {
 
     override fun onCreate() {
